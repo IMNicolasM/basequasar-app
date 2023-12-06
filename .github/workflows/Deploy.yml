@@ -8,4 +8,16 @@ jobs:
 
     steps:
       - name: Get current branch
-        run: echo "Current branch is ${{ github.ref.heads }}"
+        run: echo "Current branch is ${{ github.ref }}"
+
+      - name: Check branch
+        run: |
+          if [ "${{ github.ref }}" != "refs/heads/dev" ]; then
+          export BRANCH_NAME=staging
+          else
+            export BRANCH_NAME=dev
+          fi
+
+      - name: Use branch variable in another step
+        run: |
+          echo "Current branch is $BRANCH_NAME"
