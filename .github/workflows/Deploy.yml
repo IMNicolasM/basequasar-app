@@ -1,6 +1,11 @@
 name: Deploy CMS
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+      inputs:
+        branch:
+          description: 'Branch to build'
+          required: true
 
 jobs:
   build-and-deploy:
