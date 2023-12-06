@@ -13,7 +13,7 @@ jobs:
       - name: Check branch
         run: |
           if [ "${{ github.ref }}" != "refs/heads/dev" ]; then
-          export BRANCH_NAME=staging
+            export BRANCH_NAME=staging
           else
             export BRANCH_NAME=dev
           fi
