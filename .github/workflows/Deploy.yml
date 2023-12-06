@@ -7,10 +7,5 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-        with:
-          repository: IMNicolasM/basequasar-app
-          token:  ${{ secrets.DEPLOY_ADMIN_THEME }}
-
       - name: Get current branch
         run: echo "Current branch is ${{ github.ref }}"
