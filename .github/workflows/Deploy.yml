@@ -8,4 +8,4 @@ jobs:
 
     steps:
       - name: Get current branch
-        run: echo "Current branch is ${{ github.ref }}"
+        run: echo "Current branch is ${{ github.ref.heads }}"
