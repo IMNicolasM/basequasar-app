@@ -32,6 +32,7 @@ jobs:
 
       - name: Merge release to input branch
         run: |
+          git fetch --unshallow
           current_branch=$(git rev-parse --abbrev-ref HEAD)
           git checkout $current_branch
           git merge origin/${{ inputs.branch }}
