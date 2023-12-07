@@ -12,5 +12,13 @@ jobs:
           repository: IMNicolasM/basequasar-app
 
 
+      - name: Set Branch to push deploy
+        id: set_branch
+        run: |
+          echo "::set-output name=branch_deploy::v.8"
+
+
       - name: Branch
-        run: git branch
+        run: | 
+          git branch
+          echo "today is $branch_deploy"
