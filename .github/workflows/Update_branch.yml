@@ -1,0 +1,25 @@
+name: Deploy CMS
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Which branch to choose for merging with the current one?'
+        required: true
+        default: 'dev'
+        options: ['main', 'staging', 'dev']
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: imagina/basequasar-app
+          token:  ${{ secrets.DEPLOY_ADMIN_THEME }}
+
+      - name: Initialize submodules
+        run: | 
+          ${{ inputs.branch }}
+          echo "${{ inputs.branch }}"
