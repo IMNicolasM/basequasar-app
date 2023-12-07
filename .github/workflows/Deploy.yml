@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: imagina/basequasar-app
+          repository: IMNicolasM/basequasar-app
 
 
       - name: Branch
