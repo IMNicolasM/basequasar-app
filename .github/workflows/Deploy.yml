@@ -21,4 +21,4 @@ jobs:
       - name: Branch
         run: | 
           git branch
-          echo "today is $branch_deploy"
+          echo "today is ${{steps.set_today.outputs.branch_deploy}}"
