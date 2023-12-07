@@ -1,15 +1,6 @@
 name: Update Current Branch
 
-on:
-  workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Which branch to choose for merging with the current one?'
-        type: choice
-        options:
-          - master
-          - staging
-          - dev
+on: workflow_dispatch
 
 jobs:
   build-and-deploy:
@@ -32,10 +23,10 @@ jobs:
 
       - name: Merge release to input branch
         run: |
-          current_branch=$(git rev-parse --abbrev-ref HEAD)
-          git checkout $current_branch
-          git merge origin/${{ inputs.branch }}
-          git submodule foreach --recursive git checkout $current_branch   
-          git submodule foreach --recursive git merge origin/${{ inputs.branch }}
-          git submodule foreach --recursive git push -u origin $current_branch
-          git push origin $current_branch
+          git branch
+          git checkout deploy
+          git merge origin/staging
+          git submodule foreach --recursive git branch   
+          git submodule foreach --recursive git checkout deploy   
+          git submodule foreach --recursive git merge origin/staging
+          git status
