@@ -19,7 +19,7 @@ jobs:
             echo "branch_deploy=v.8" >> "$GITHUB_ENV"
           else
             # Set branch_deploy to the current branch name
-            $branch = git branch
+            branch=$(git rev-parse --abbrev-ref HEAD)
             echo "branch_deploy=$branch" >> "$GITHUB_ENV"
           fi
 
