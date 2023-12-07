@@ -32,10 +32,10 @@ jobs:
 
       - name: Merge release to input branch
         run: |
-          branch=$(git rev-parse --abbrev-ref HEAD)
-          git checkout $branch
+          current_branch=$(git rev-parse --abbrev-ref HEAD)
+          git checkout $current_branch
           git merge origin/${{ inputs.branch }}
-          git submodule foreach --recursive git checkout $branch   
+          git submodule foreach --recursive git checkout $current_branch   
           git submodule foreach --recursive git merge origin/${{ inputs.branch }}
-          git submodule foreach --recursive git push -u origin $branch
-          git push origin $branch
+          git submodule foreach --recursive git push -u origin $current_branch
+          git push origin $current_branch
