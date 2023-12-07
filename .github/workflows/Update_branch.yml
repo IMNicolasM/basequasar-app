@@ -5,9 +5,11 @@ on:
     inputs:
       branch:
         description: 'Which branch to choose for merging with the current one?'
-        required: true
-        default: 'dev'
-        options: ['main', 'staging', 'dev']
+        type: choice
+        options:
+          - main
+          - staging
+          - dev
 
 jobs:
   build-and-deploy:
