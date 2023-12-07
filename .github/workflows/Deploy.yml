@@ -15,7 +15,12 @@ jobs:
       - name: Set Branch to push deploy
         id: set_branch
         run: |
-          echo "::set-output name=branch_deploy::v.8"
+          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            echo "::set-output name=branch_deploy::v.8"
+          else
+            # Set branch_deploy to the current branch name
+            echo "::set-output name=branch_deploy::${{ github.head_ref }}"
+          fi
 
 
       - name: Branch
