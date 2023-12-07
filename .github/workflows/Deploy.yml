@@ -16,15 +16,16 @@ jobs:
         id: set_branch
         run: |
           if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-            echo "::set-output name=branch_deploy::v.8"
+            echo "branch_deploy=v.8" >> "$GITHUB_ENV"
           else
             # Set branch_deploy to the current branch name
-            echo "::set-output name=branch_deploy::${{ github.head_ref }}"
+            $branch = git branch
+            echo "branch_deploy=$branch" >> "$GITHUB_ENV"
           fi
 
 
       - name: Branch
         run: | 
           git branch
-          echo "${{ git.head_ref }}"
+          echo "branch_deploy"
           echo "today is ${{steps.set_branch.outputs.branch_deploy}}"
