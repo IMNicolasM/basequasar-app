@@ -23,8 +23,9 @@ jobs:
 
       - name: Merge release to input branch
         run: |
+          git fetch
+          git status
           git branch
-          git checkout deploy
           git merge origin/staging
           git submodule foreach --recursive git branch   
           git submodule foreach --recursive git checkout deploy   
