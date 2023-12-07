@@ -7,7 +7,7 @@ on:
         description: 'Which branch to choose for merging with the current one?'
         type: choice
         options:
-          - main
+          - master
           - staging
           - dev
 
@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: IMNicolasM/basequasar-app
+          repository: imagina/basequasar-app
           token:  ${{ secrets.DEPLOY_ADMIN_THEME }}
 
       - name: Initialize submodules
@@ -32,7 +32,6 @@ jobs:
 
       - name: Merge release to input branch
         run: |
-          git fetch --unshallow
           current_branch=$(git rev-parse --abbrev-ref HEAD)
           git checkout $current_branch
           git merge origin/${{ inputs.branch }}
