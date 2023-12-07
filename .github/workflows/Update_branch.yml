@@ -1,4 +1,4 @@
-name: Deploy CMS
+name: Update Current Branch
 
 on:
   workflow_dispatch:
