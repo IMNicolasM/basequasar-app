@@ -26,6 +26,8 @@ jobs:
         run: |
           # Get the current branch
           current_branch=$(git rev-parse --abbrev-ref HEAD)
+          branch="branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> "$GITHUB_ENV"
+          echo "$current_branch -> $branch"
           echo "current_branch=$current_branch" >> "$GITHUB_ENV"
           
           # Set the branch to merge based on the current branch
