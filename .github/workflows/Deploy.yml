@@ -49,7 +49,7 @@ jobs:
 
       - name: Prepare Staging to Release
         run: |
-          git fetch --unshallow
+          git status
           git checkout $current_branch
           git submodule foreach --recursive git checkout $current_branch
 
