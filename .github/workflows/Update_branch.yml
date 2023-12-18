@@ -24,24 +24,26 @@ jobs:
       - name: Set Branch
         id: set_branch
         run: |
-          # Get the current branch
-          current_branch=$(git rev-parse --abbrev-ref HEAD)
-          branch="branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> "$GITHUB_ENV"
-          echo "$current_branch -> $branch"
+          # Obtener la rama actual desde las variables de entorno de GitHub
+          current_branch="${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}"
+          
+          # Imprimir la rama actual y establecerla como variable de entorno
+          echo "Rama actual: $current_branch"
           echo "current_branch=$current_branch" >> "$GITHUB_ENV"
           
-          # Set the branch to merge based on the current branch
+          # Establecer la rama a fusionar basándose en la rama actual
           if [ "$current_branch" == "master" ]; then
             branch_to_merge="staging"
           elif [ "$current_branch" == "staging" ]; then
             branch_to_merge="dev"
           else
-            # If it's neither master nor staging, you can set a default value or handle it as needed
+            # Establecer un valor predeterminado si no es ni master ni staging
             branch_to_merge="default_branch"
           fi
           
+          # Imprimir la información de la rama a fusionar y establecerla como variable de entorno
+          echo "Rama a fusionar: $current_branch -> $branch_to_merge"
           echo "branch_to_merge=$branch_to_merge" >> "$GITHUB_ENV"
-          echo "Branch: $current_branch -> $branch_to_merge"
 
       - name: Update Version
         if: ${{ github.ref }} == "refs/heads/staging"
