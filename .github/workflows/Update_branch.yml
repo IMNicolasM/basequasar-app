@@ -32,7 +32,7 @@ jobs:
             # Set branch_deploy to the current branch name
             echo "branch_to_merge=dev" >> "$GITHUB_ENV"
           fi
-          echo $current_branch
+          echo "Branch: $current_branch -> $branch_to_merge"
 
       - name: Update Version
         if: ${{ github.ref }} == "refs/heads/staging"
