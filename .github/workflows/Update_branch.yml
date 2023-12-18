@@ -24,14 +24,21 @@ jobs:
       - name: Set Branch
         id: set_branch
         run: |
-          branch=$(git rev-parse --abbrev-ref HEAD)
-          echo "current_branch=$branch" >> "$GITHUB_ENV"
-          if [ "$branch" == "master" ]; then
-            echo "branch_to_merge=staging" >> "$GITHUB_ENV"
-          elif [ "$branch" == "staging" ]; then
-            # Set branch_deploy to the current branch name
-            echo "branch_to_merge=dev" >> "$GITHUB_ENV"
+          # Get the current branch
+          current_branch=$(git rev-parse --abbrev-ref HEAD)
+          echo "current_branch=$current_branch" >> "$GITHUB_ENV"
+          
+          # Set the branch to merge based on the current branch
+          if [ "$current_branch" == "master" ]; then
+            branch_to_merge="staging"
+          elif [ "$current_branch" == "staging" ]; then
+            branch_to_merge="dev"
+          else
+            # If it's neither master nor staging, you can set a default value or handle it as needed
+            branch_to_merge="default_branch"
           fi
+          
+          echo "branch_to_merge=$branch_to_merge" >> "$GITHUB_ENV"
           echo "Branch: $current_branch -> $branch_to_merge"
 
       - name: Update Version
