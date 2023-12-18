@@ -55,9 +55,3 @@ jobs:
 
       - name: Build as PWA
         run: quasar build -m pwa
-
-          git add .
-          git commit -m "+Release: Iadmin"
-          git push origin $branch_deploy
-        env:
-          GITHUB_TOKEN: ${{ secrets.DEPLOY_ADMIN_THEME }}
