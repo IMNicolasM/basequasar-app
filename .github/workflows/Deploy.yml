@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: imagina/basequasar-app
+          repository: IMNicolasM/basequasar-app
           token:  ${{ secrets.DEPLOY_ADMIN_THEME }}
 
       - name: Set up Node.js
@@ -56,16 +56,6 @@ jobs:
       - name: Build as PWA
         run: quasar build -m pwa
 
-      - name: Rename folder pwa as iadmin
-        run: mv dist/pwa iadmin
-
-      - name: Remove old iadmin and publish iadmin folder in repository
-        run: |
-          git clone https://github.com/imagina/imaginacmsadmin-theme.git tmp_repo
-          cd tmp_repo
-          git checkout $branch_deploy
-          rm -rf iadmin
-          cp -r ../iadmin ./iadmin
           git add .
           git commit -m "+Release: Iadmin"
           git push origin $branch_deploy
