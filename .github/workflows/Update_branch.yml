@@ -58,9 +58,10 @@ jobs:
 
       - name: Merge release to input branch
         run: |
-          git merge origin/$branch_to_merge
+          git merge --allow-unrelated-histories origin/$branch_to_merge
           git submodule foreach --recursive git fetch
           git submodule foreach --recursive git checkout $current_branch   
-          git submodule foreach --recursive git merge origin/$branch_to_merge
+          git submodule foreach --recursive git merge --allow-unrelated-histories origin/$branch_to_merge
           git submodule foreach --recursive git push -u origin $current_branch
           git push origin $current_branch
+
