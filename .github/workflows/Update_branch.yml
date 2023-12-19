@@ -41,7 +41,8 @@ jobs:
 
       - name: Update Version
         run: |
-          git fetch
+          git remote -v
+          git fetch origin
           echo "Test: $current_branch"
           if [ "$current_branch" == "staging" ]; then
             git checkout $branch_to_merge
