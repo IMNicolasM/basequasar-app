@@ -42,10 +42,10 @@ jobs:
       - name: Update Version
         run: |
           git remote -v
-          git fetch origin
+          git branch
           echo "Test: $current_branch"
           if [ "$current_branch" == "staging" ]; then
-            git checkout $branch_to_merge
+            git checkout -b $branch_to_merge
             git merge origin/$branch_to_merge
             git submodule foreach --recursive git checkout $branch_to_merge
             git submodule foreach --recursive git merge origin/$branch_to_merge
@@ -57,7 +57,7 @@ jobs:
 
       - name: Merge release to input branch
         run: |
-          git checkout $current_branch
+          git checkout -b $current_branch
           git merge origin/$branch_to_merge
           git submodule foreach --recursive git checkout $current_branch   
           git submodule foreach --recursive git merge origin/$branch_to_merge
