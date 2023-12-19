@@ -41,6 +41,7 @@ jobs:
 
       - name: Update Version
         run: |
+          git fetch
           echo "Test: $current_branch"
           if [ "$current_branch" == "staging" ]; then
             git checkout $branch_to_merge
