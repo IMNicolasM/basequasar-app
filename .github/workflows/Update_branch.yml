@@ -44,7 +44,7 @@ jobs:
           git remote -v
           git branch
           echo "Test: $current_branch"
-          git fetch --all
+          git fetch --no-recurse-submodules
           if [ "$current_branch" == "staging" ]; then
             git checkout -b $branch_to_merge
             git merge origin/$branch_to_merge
@@ -59,6 +59,7 @@ jobs:
       - name: Merge release to input branch
         run: |
           git merge origin/$branch_to_merge
+          git submodule foreach --recursive git fetch
           git submodule foreach --recursive git checkout $current_branch   
           git submodule foreach --recursive git merge origin/$branch_to_merge
           git submodule foreach --recursive git push -u origin $current_branch
