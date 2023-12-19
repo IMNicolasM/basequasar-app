@@ -26,9 +26,6 @@ jobs:
         run: |
           # Obtener la rama actual desde las variables de entorno de GitHub
           current_branch="${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}"
-          
-          # Imprimir la rama actual y establecerla como variable de entorno
-          echo "Rama actual: $current_branch"
           echo "current_branch=$current_branch" >> "$GITHUB_ENV"
           
           # Establecer la rama a fusionar basándose en la rama actual
@@ -36,9 +33,6 @@ jobs:
             branch_to_merge="staging"
           elif [ "$current_branch" == "staging" ]; then
             branch_to_merge="dev"
-          else
-            # Establecer un valor predeterminado si no es ni master ni staging
-            branch_to_merge="default_branch"
           fi
           
           # Imprimir la información de la rama a fusionar y establecerla como variable de entorno
@@ -46,7 +40,7 @@ jobs:
           echo "branch_to_merge=$branch_to_merge" >> "$GITHUB_ENV"
 
       - name: Update Version
-        if: ${{ github.ref }} == "refs/heads/staging"
+        if: ${GITHUB_REF#refs/heads/} == 'staging'
         run: |
           git checkout $branch_to_merge
           git merge origin/$branch_to_merge
