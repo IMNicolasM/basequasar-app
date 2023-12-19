@@ -40,16 +40,18 @@ jobs:
           echo "branch_to_merge=$branch_to_merge" >> "$GITHUB_ENV"
 
       - name: Update Version
-        if: ${GITHUB_REF#refs/heads/} == 'staging'
         run: |
-          git checkout $branch_to_merge
-          git merge origin/$branch_to_merge
-          git submodule foreach --recursive git checkout $branch_to_merge
-          git submodule foreach --recursive git merge origin/$branch_to_merge
-          git add .
-          git commit -m "Realease"
-          npm version patch
-          git push origin $branch_to_merge
+          echo "Test: $current_branch"
+          if [ "$current_branch" == "master" ]; then
+            git checkout $branch_to_merge
+            git merge origin/$branch_to_merge
+            git submodule foreach --recursive git checkout $branch_to_merge
+            git submodule foreach --recursive git merge origin/$branch_to_merge
+            git add .
+            git commit -m "Realease"
+            npm version patch
+            git push origin $branch_to_merge
+          fi
 
       - name: Merge release to input branch
         run: |
