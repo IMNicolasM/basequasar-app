@@ -44,6 +44,7 @@ jobs:
           git remote -v
           git branch
           echo "Test: $current_branch"
+          git fetch --all
           if [ "$current_branch" == "staging" ]; then
             git checkout -b $branch_to_merge
             git merge origin/$branch_to_merge
