@@ -1,5 +1,5 @@
 export default {
-  'Ileads': {
+  'ileads': {
     'cms': {
       'sidebar': {
         'adminAssignments': 'Assignments',
@@ -8,7 +8,9 @@ export default {
       'button': {},
       'table': {},
       'label': {},
-      'form': {},
+      'form': {
+        'apptdate': 'Appointment Date'
+      },
       'messages': {},
       'validation': {},
     }

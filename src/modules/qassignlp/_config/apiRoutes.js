@@ -7,5 +7,5 @@ export default {
   urlBase : urlBase,
   version: moduleVersion,
   assignments: `${urlBase}/assignments`,
-  employees: `${urlBase}/employees`,
+  employees: `${urlBase}/employees`
 }

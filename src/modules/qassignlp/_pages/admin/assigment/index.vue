@@ -63,17 +63,21 @@
       </div>
 
     </div>
+
+    <dynamic-table-clone :columns="columns" :rows="assignedData"/>
   </div>
 </template>
 <script>
 import {defineComponent} from 'vue';
 import controller from './controller';
 import dynamicFilter from 'modules/qsite/_components/master/dynamicFilter';
+import dynamicTableClone from 'modules/qassignlp/_components/dynamicTableClone/index.vue';
 
 export default defineComponent({
   props: {},
   components: {
-    dynamicFilter
+    dynamicFilter,
+    dynamicTableClone
   },
   setup() {
     return {...controller()};
