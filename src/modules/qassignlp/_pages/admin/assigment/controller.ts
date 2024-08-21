@@ -1,6 +1,7 @@
 import {reactive, toRefs, computed} from 'vue';
 import {i18n, moment, alert, helper} from 'src/plugins/utils'
 import service from './services'
+import getName from './getName.vue'
 
 const dateFormat = 'YYYY/MM/DD'
 const assingRoute = 'apiRoutes.qassignlp.assignments'
@@ -13,6 +14,7 @@ export default function controller() {
   // States
   const state = reactive({
     excludeActions: ['search'],
+    loading: false,
     dynamicFilterValues: {},
     dynamicFilterSummary: {},
     showDynamicFilterModal: false,
@@ -24,7 +26,7 @@ export default function controller() {
       }
     },
     filters: {
-      slr_name: {
+      slr_id: {
         value: null,
         type: 'select',
         props: {
@@ -36,6 +38,21 @@ export default function controller() {
           select: {label: 'name', id: 'id'},
           requestParams: {filter: {active: 1}}
         }
+      },
+      brn_id: {
+        value: 'ALL',
+        type: 'select',
+        quickFilter: true,
+        props: {
+          label: i18n.tr('ileads.cms.form.slrName'),
+          options: [
+            { label: '-- ALL --', value: 'ALL' }
+          ]
+        },
+        loadOptions: {
+          apiRoute: 'apiRoutes.qassignlp.branches',
+          select: {label: 'LongName', id: 'ShortName'}
+        }
       }
     },
     requestParams: {
@@ -45,11 +62,11 @@ export default function controller() {
     },
     assignedData: [],
     columns: [
-      {name: 'slrName', label: i18n.tr('isite.cms.form.district'), field: 'slrName', align: 'rigth'},
-      {name: 'slot1', label: i18n.tr('ileads.cms.form.morning'), field: 'slot1', draggable: true},
-      {name: 'slot2', label: i18n.tr('ileads.cms.form.afternoon'), field: 'slot2', draggable: true},
-      {name: 'slot3', label: i18n.tr('ileads.cms.form.lateAfternoon'), field: 'slot3', draggable: true},
-      {name: 'slot4', label: i18n.tr('ileads.cms.form.evening'), field: 'slot4', draggable: true},
+      {name: 'brnId', label: i18n.tr('ileads.cms.form.slrName'), field: 'brnId', align: 'rigth', component: getName},
+      {name: 'slot1', label: i18n.tr('ileads.cms.form.morning'), field: 'slot1', align: 'center', draggable: true, borderColor: '#36d7b7'},
+      {name: 'slot2', label: i18n.tr('ileads.cms.form.afternoon'), field: 'slot2', align: 'center', draggable: true, borderColor: '#e08283'},
+      {name: 'slot3', label: i18n.tr('ileads.cms.form.lateAfternoon'), field: 'slot3', align: 'center', draggable: true, borderColor: '#7bbcf5'},
+      {name: 'slot4', label: i18n.tr('ileads.cms.form.evening'), field: 'slot4', align: 'center', draggable: true, borderColor: '#a0a0ef'},
     ]
   });
 
@@ -70,9 +87,11 @@ export default function controller() {
       methods.getData(false, filters, {page: 1});
     },
     async getData(refresh = false, filter = {}, pagination: any = false) {
+      state.loading = true
+      let otherFilters = state.dynamicFilterValues
       const params = {
-        filter: {...(filter || {}), ...state.requestParams.params},
-        take: 10
+        filter: {...(otherFilters || {}), ...(filter || {}), ...state.requestParams.params, order: {way: 'asc', field: 'brn_id'}},
+        take: 1000
       }
 
       await service.getData(assingRoute, refresh, params).then(response => {
@@ -86,6 +105,7 @@ export default function controller() {
           if (!mappedData[slrId]) {
             mappedData[slrId] = {
               slrName: a.slr_name,
+              brnId: a.brn_id,
               slot1: [],
               slot2: [],
               slot3: [],
@@ -95,11 +115,16 @@ export default function controller() {
 
           mappedData[slrId][`slot${a.slot}`].push(camelCaseResponse)
         })
-        state.assignedData = Object.values(mappedData)
+
+        const valuesMap: any = Object.values(mappedData || {})
+
+        state.assignedData = valuesMap.sort((a,b) => a.brnId.localeCompare(b.brnId))
 
       }).catch(() => {
         alert.error(i18n.tr('isite.cms.message.errorRequest'))
       });
+
+      state.loading = false
     },
     setDate(newDate: any) {
       state.requestParams.params.apptdate = newDate

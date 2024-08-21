@@ -9,7 +9,12 @@ export default {
       'table': {},
       'label': {},
       'form': {
-        'apptdate': 'Appointment Date'
+        'apptdate': 'Appointment Date',
+        'slrName': 'Sales Rep',
+        'morning': 'Morning',
+        'afternoon': 'Afternoon',
+        'lateAfternoon': 'Late Afternoon',
+        'evening': 'Evening'
       },
       'messages': {},
       'validation': {},

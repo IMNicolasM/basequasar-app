@@ -8,6 +8,7 @@
       :columns="columns"
       row-key="name"
       hide-pagination
+      :rows-per-page-options="[0]"
     >
       <template v-slot:loading>
         <q-inner-loading showing color="primary" />

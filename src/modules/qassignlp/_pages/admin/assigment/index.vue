@@ -64,7 +64,18 @@
 
     </div>
 
-    <dynamic-table-clone :columns="columns" :rows="assignedData"/>
+    <section class="tw-w-full tw-flex tw-flex-wrap md:tw-flex-nowrap tw-gutter-sm md:tw-gutter-md tw-gap-4">
+<!--      <div class="tw-w-full md:tw-w-[40%] md:tw-order-2">-->
+<!--        Hola-->
+<!--      </div>-->
+      <dynamic-table-clone
+        :columns="columns"
+        :rows="assignedData"
+        :loading="loading"
+        class="tw-w-full md:tw-w-[100%] md:tw-order-1"
+      />
+    </section>
+
   </div>
 </template>
 <script>

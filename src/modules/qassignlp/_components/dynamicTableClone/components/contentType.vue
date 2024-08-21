@@ -3,6 +3,7 @@
   <div :style="col?.style">
     <!--      @change="reorderColumns"-->
     <draggable
+      class="tw-flex wrap tw-items-center tw-justify-center tw-max-w-72"
       v-if="isDraggable"
       :list="data"
       group="table"
@@ -10,38 +11,15 @@
     >
       <template #item="{ element }">
         <div>
-          {{ element }}
+          <q-card bordered class="tw-max-w-36 tw-border-l-2" :style="{ borderLeftColor: col.borderColor }">
+            <q-card-section class="wrap q-pa-sm">
+              <div class="tw-font-bold tw-text-gray-800" style="white-space: normal; word-wrap: break-word;">{{element.brnId}}: {{ element.csz }}</div>
+              <div class="tw-font-semibold tw-text-gray-600">{{ $trd(element.apptClockTime, {type: 'time'}) }} <span v-if="element.distance"> - {{ parseInt(element.distance) }} mi</span></div>
+            </q-card-section>
+          </q-card>
         </div>
       </template>
     </draggable>
-    <!--    <draggable-->
-    <!--      v-if="isDraggable"-->
-    <!--      :list="data"-->
-    <!--      group="table"-->
-    <!--      item-key="slrName"-->
-    <!--    >-->
-
-    <!--      <template #item="{ element }">-->
-    <!--&lt;!&ndash;        <div>&ndash;&gt;-->
-    <!--&lt;!&ndash;          {{ element }}&ndash;&gt;-->
-    <!--&lt;!&ndash;        </div>&ndash;&gt;-->
-
-    <!--        &lt;!&ndash;        <div v-if="!loading" :class="{'notMoveBetweenColumns': element.type !== 1}">&ndash;&gt;-->
-    <!--        &lt;!&ndash;          <kanbanColumn&ndash;&gt;-->
-    <!--        &lt;!&ndash;            :column-data="element"&ndash;&gt;-->
-    <!--        &lt;!&ndash;            :columnIndex="index"&ndash;&gt;-->
-    <!--        &lt;!&ndash;            :totalColumns="kanbanColumns.length"&ndash;&gt;-->
-    <!--        &lt;!&ndash;            :ref="`kanbanColumn-${element.id}`"&ndash;&gt;-->
-    <!--        &lt;!&ndash;            class="&ndash;&gt;-->
-    <!--        &lt;!&ndash;                tw-flex-none tw-space-y-0&ndash;&gt;-->
-    <!--        &lt;!&ndash;                w-h-auto&ndash;&gt;-->
-    <!--        &lt;!&ndash;                tw-bg-gray-100 tw-rounded-lg tw-shadow&ndash;&gt;-->
-    <!--        &lt;!&ndash;              "&ndash;&gt;-->
-    <!--        &lt;!&ndash;          />&ndash;&gt;-->
-    <!--        &lt;!&ndash;        </div>&ndash;&gt;-->
-    <!--      </template>-->
-    <!--    </draggable>-->
-    <!-- custom component -->
     <component
       v-else-if="component"
       v-show="!isLoading"
