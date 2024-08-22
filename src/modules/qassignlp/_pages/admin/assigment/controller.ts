@@ -30,8 +30,8 @@ export default function controller() {
         },
         loadOptions: {
           apiRoute: 'apiRoutes.qassignlp.employees',
-          select: {label: 'name', id: 'id'},
-          requestParams: {filter: {active: 1}}
+          select: {label: item => `${item.LastName}, ${item.FirstName}`, id: 'id'},
+          requestParams: {filter: {active: 1, salesrep: 1}}
         }
       },
       brn_id: {
@@ -46,7 +46,7 @@ export default function controller() {
         },
         loadOptions: {
           apiRoute: 'apiRoutes.qassignlp.branches',
-          select: {label: 'LongName', id: 'ShortName'}
+          select: {label: 'ShortName', id: 'ShortName'} //{label: 'LongName', id: 'ShortName'}
         }
       },
       apptdate: {
@@ -110,6 +110,7 @@ export default function controller() {
           if (!mappedData[slrId]) {
             mappedData[slrId] = {
               slrName: a.slr_name,
+              slrBrn: a.sal_brn,
               brnId: a.brn_id,
               slot1: [],
               slot2: [],

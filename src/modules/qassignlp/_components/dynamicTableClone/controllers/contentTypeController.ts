@@ -34,6 +34,12 @@ export default function controller(props, emit) {
       if(computeds.isComponent.value){
         state.component = markRaw(props.col.component)
       }
+    },
+    getDriveTime(dist: string) {
+      const average_speed_mph = 50
+      let distance = parseInt(dist) || 0
+
+      return Math.round(distance / average_speed_mph * 60)
     }
   }
 
