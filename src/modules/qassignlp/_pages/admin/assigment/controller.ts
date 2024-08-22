@@ -18,13 +18,8 @@ export default function controller() {
     dynamicFilterValues: {},
     dynamicFilterSummary: {},
     showDynamicFilterModal: false,
-    apptdateFilter: {
-      value: moment().format(dateFormat),
-      type: 'date',
-      props: {
-        label: i18n.tr('ileads.cms.form.apptdate')
-      }
-    },
+    totalAssigns: 0,
+    totalMiles: 0,
     filters: {
       slr_id: {
         value: null,
@@ -44,7 +39,7 @@ export default function controller() {
         type: 'select',
         quickFilter: true,
         props: {
-          label: i18n.tr('ileads.cms.form.slrName'),
+          label: i18n.tr('ileads.cms.form.brnId'),
           options: [
             { label: '-- ALL --', value: 'ALL' }
           ]
@@ -53,11 +48,15 @@ export default function controller() {
           apiRoute: 'apiRoutes.qassignlp.branches',
           select: {label: 'LongName', id: 'ShortName'}
         }
-      }
-    },
-    requestParams: {
-      params: {
-        apptdate: moment().format(dateFormat)
+      },
+      apptdate: {
+        value: moment().format(dateFormat),
+        type: 'date',
+        quickFilter: true,
+        quickNavigation: true,
+        props: {
+          label: i18n.tr('ileads.cms.form.apptdate')
+        }
       }
     },
     assignedData: [],
@@ -90,17 +89,23 @@ export default function controller() {
       state.loading = true
       let otherFilters = state.dynamicFilterValues
       const params = {
-        filter: {...(otherFilters || {}), ...(filter || {}), ...state.requestParams.params, order: {way: 'asc', field: 'brn_id'}},
+        filter: {...(otherFilters || {}), ...(filter || {}), order: {way: 'asc', field: 'brn_id'}},
         take: 1000
       }
 
+      let totalMiles = 0;
+
       await service.getData(assingRoute, refresh, params).then(response => {
         const mappedData: any = {};
+
+        state.totalAssigns = response.meta.page.total
 
         response.data.forEach(a => {
           const slrId = a.slr_id
 
           const camelCaseResponse = helper.snakeToCamelCaseKeys(a)
+
+          totalMiles += parseInt(a.distance || 0)
 
           if (!mappedData[slrId]) {
             mappedData[slrId] = {
@@ -120,35 +125,13 @@ export default function controller() {
 
         state.assignedData = valuesMap.sort((a,b) => a.brnId.localeCompare(b.brnId))
 
+        state.totalMiles = totalMiles
+
       }).catch(() => {
         alert.error(i18n.tr('isite.cms.message.errorRequest'))
       });
 
       state.loading = false
-    },
-    setDate(newDate: any) {
-      state.requestParams.params.apptdate = newDate
-      state.apptdateFilter.value = newDate
-
-      methods.getData()
-    },
-    goToPrevious() {
-      //prev day
-      const apptdate = moment(state.requestParams.params.apptdate)
-        .subtract(1, 'days').startOf('day').format(dateFormat)
-      methods.setDate(apptdate)
-    },
-    goToNext() {
-      //next day
-      const apptdate = moment(state.requestParams.params.apptdate)
-        .add(1, 'days').startOf('day').format(dateFormat)
-      methods.setDate(apptdate)
-    },
-    setApptDate(value: any) {
-      if (value != null) {
-        const apptdate = moment(value).format(dateFormat)
-        if (apptdate != state.requestParams.params.apptdate) methods.setDate(apptdate)
-      }
     }
   };
 
