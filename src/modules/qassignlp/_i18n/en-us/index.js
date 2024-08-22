@@ -14,7 +14,8 @@ export default {
         'morning': 'Morning',
         'afternoon': 'Afternoon',
         'lateAfternoon': 'Late Afternoon',
-        'evening': 'Evening'
+        'evening': 'Evening',
+        'brnId': 'Market'
       },
       'messages': {},
       'validation': {},

@@ -22,46 +22,15 @@
       @update:summary="summary => dynamicFilterSummary = summary"
     />
 
-
-    <div class="tw-w-full tw-flex q-my-md items-center tw-gap-x-2">
-      <dynamic-field
-        v-model="apptdateFilter.value"
-        @update:model-value="(value) => setApptDate(value)"
-        :field="apptdateFilter"
-        style="width: 246px;"
-      />
-      <div class="row no-wrap" style="margin-top: -15px">
-        <q-btn
-          text-color="primary"
-          class="q-mr-sm"
-          size="sm"
-          unelevated
-          round
-          icon="fa-regular fa-chevron-left"
-          @click="goToPrevious()"
-        >
-          <q-tooltip anchor="bottom middle" self="top middle">
-            Previous day
-          </q-tooltip>
-        </q-btn>
-        <q-btn
-          text-color="primary"
-          class="q-mr-sm"
-          size="sm"
-          unelevated
-          round
-          icon="fa-regular fa-chevron-right"
-          @click="goToNext()"
-        >
-          <q-tooltip anchor="bottom middle" self="top middle">
-            Next Day
-          </q-tooltip>
-        </q-btn>
+    <div class="tw-sticky tw-top-0 tw-flex tw-items-center tw-p-2 tw-bg-gray-50 tw-shadow-md tw-z-10">
+      <div class="tw-text-sm tw-font-semibold">
+        # of Appointments:
+        <span class="text-primary">{{ totalAssigns }}</span>
       </div>
-      <div class="text-primary" style="font-size: 16px; margin-top: -15px">
-        <div>Day: {{ $moment(requestParams.params.apptdate).format('MMM Do') }}</div>
+      <div class="tw-text-sm tw-ml-8 tw-font-semibold">
+        Miles Driven:
+        <span class="text-primary">{{ totalMiles }}</span>
       </div>
-
     </div>
 
     <section class="tw-w-full tw-flex tw-flex-wrap md:tw-flex-nowrap tw-gutter-sm md:tw-gutter-md tw-gap-4">
