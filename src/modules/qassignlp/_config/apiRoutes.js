@@ -8,5 +8,6 @@ export default {
   version: moduleVersion,
   assignments: `${urlBase}/assignments`,
   employees: `${urlBase}/employees`,
-  branches: `${urlBase}/branches`
+  branches: `${urlBase}/branches`,
+  followups: `${urlBase}/followups`
 }

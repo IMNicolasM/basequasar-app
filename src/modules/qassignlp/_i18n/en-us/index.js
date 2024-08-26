@@ -3,6 +3,7 @@ export default {
     'cms': {
       'sidebar': {
         'adminAssignments': 'Assignments',
+        'adminPrevAssignments': 'Preview Assignments'
       },
       'title': {},
       'button': {},

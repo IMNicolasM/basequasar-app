@@ -1,10 +1,11 @@
 import {reactive, toRefs, computed} from 'vue';
-import {i18n, moment, alert, helper} from 'src/plugins/utils'
+import {i18n, moment, alert, helper, clone} from 'src/plugins/utils'
 import service from './services'
 import getName from './getName.vue'
 
 const dateFormat = 'YYYY/MM/DD'
 const assingRoute = 'apiRoutes.qassignlp.assignments'
+const followRoute = 'apiRoutes.qassignlp.followups'
 
 export default function controller() {
 
@@ -83,56 +84,85 @@ export default function controller() {
     },
     updateDynamicFilterValues(filters: any) {
       state.dynamicFilterValues = filters;
-      methods.getData(false, filters, {page: 1});
+      methods.getData(false, filters);
     },
-    async getData(refresh = false, filter = {}, pagination: any = false) {
+    async getData(refresh = false, filter = {}) {
       state.loading = true
       let otherFilters = state.dynamicFilterValues
-      const params = {
+      const params: any = {
         filter: {...(otherFilters || {}), ...(filter || {}), order: {way: 'asc', field: 'brn_id'}},
         take: 1000
       }
 
-      let totalMiles = 0;
+      let total = 0
+      let totalMiles = 0
+      let mappedData = {}
 
-      await service.getData(assingRoute, refresh, params).then(response => {
-        const mappedData: any = {};
+      await Promise.all([
+        methods.getAssignedLeads(refresh, params),
+        methods.getFollowups(refresh, params)
+      ]).then((res: any) => {
+        res.forEach(r => {
 
-        state.totalAssigns = response.meta.page.total
+          r.data.forEach(a => {
+            const slrId = a.slr_id
 
-        response.data.forEach(a => {
-          const slrId = a.slr_id
+            const camelCaseResponse = helper.snakeToCamelCaseKeys(a)
 
-          const camelCaseResponse = helper.snakeToCamelCaseKeys(a)
+            totalMiles += parseInt(a.distance || 0)
 
-          totalMiles += parseInt(a.distance || 0)
-
-          if (!mappedData[slrId]) {
-            mappedData[slrId] = {
-              slrName: a.slr_name,
-              slrBrn: a.sal_brn,
-              brnId: a.brn_id,
-              slot1: [],
-              slot2: [],
-              slot3: [],
-              slot4: []
+            if (!mappedData[slrId]) {
+              mappedData[slrId] = {
+                slrName: a.slr_name,
+                slrBrn: a.sal_brn,
+                brnId: a.brn_id,
+                slot1: [],
+                slot2: [],
+                slot3: [],
+                slot4: []
+              }
             }
-          }
 
-          mappedData[slrId][`slot${a.slot}`].push(camelCaseResponse)
+            mappedData[slrId][`slot${a.slot}`].push(camelCaseResponse)
+          })
+          total += r.total
         })
+      }).catch(e => console.log(e))
 
-        const valuesMap: any = Object.values(mappedData || {})
+      const valuesMap: any = Object.values(mappedData || {})
 
-        state.assignedData = valuesMap.sort((a,b) => a.brnId.localeCompare(b.brnId))
-
-        state.totalMiles = totalMiles
-
-      }).catch(() => {
-        alert.error(i18n.tr('isite.cms.message.errorRequest'))
-      });
+      const assignedData = valuesMap.sort((a,b) => a.brnId.localeCompare(b.brnId))
+      state.assignedData = assignedData
+      state.totalMiles = totalMiles
+      state.totalAssigns = total
 
       state.loading = false
+    },
+    getFollowups(refresh, params) {
+      return new Promise((resolve, reject) => {
+        service.getData(followRoute, refresh, params).then(response => {
+          const total = response.meta.page.total
+
+          resolve({data: response.data, total})
+
+        }).catch((e) => {
+          alert.error(i18n.tr('isite.cms.message.errorRequest'))
+          reject(e)
+        });
+      })
+    },
+    getAssignedLeads(refresh, params) {
+      return new Promise((resolve, reject) => {
+        service.getData(assingRoute, refresh, params).then(response => {
+          const total = response.meta.page.total
+
+          resolve({data: response.data, total})
+
+        }).catch((e) => {
+          alert.error(i18n.tr('isite.cms.message.errorRequest'))
+          reject(e)
+        });
+      })
     }
   };
 

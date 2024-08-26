@@ -14,6 +14,7 @@
           <q-card bordered class="tw-min-w-34 tw-max-w-36 tw-border-l-2" :style="{ borderLeftColor: col.borderColor }">
             <q-card-section class="wrap q-pa-sm tw-text-[10px]">
               <div class="tw-font-bold tw-text-gray-800" style="white-space: normal; word-wrap: break-word;">{{element.brnId}}: {{ element.csz }}</div>
+              <div class="tw-font-bold text-primary tw-text-xs" v-if="element.followupdate">Followup</div>
               <div class="tw-font-semibold tw-text-gray-600">{{ $trd(element.apptClockTime, {type: 'time'}) }}</div>
               <div class="tw-font-semibold tw-text-gray-600" v-if="element.distance">({{ parseInt(element.distance) }} mi / {{ getDriveTime(element.distance) }} mins)</div>
             </q-card-section>
