@@ -19,7 +19,7 @@ export default {
     authenticated: true,
     path: '/lead/prev-appointments',
     name: 'qassignlp.admin.prevAssigments',
-    page: () => import('src/modules/qassignlp/_pages/admin/assigment/index.vue'),
+    page: () => import('src/modules/qassignlp/_pages/admin/prevAssigment/index.vue'),
     layout: () => import('layouts/master.vue'),
     title: 'ileads.cms.sidebar.adminPrevAssignments',
     icon: 'fa-light fa-bullseye-pointer',

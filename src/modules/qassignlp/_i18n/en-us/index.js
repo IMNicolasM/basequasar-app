@@ -18,7 +18,9 @@ export default {
         'evening': 'Evening',
         'brnId': 'Market'
       },
-      'messages': {},
+      'messages': {
+        'reassign': 'Reassign'
+      },
       'validation': {},
     }
   }
