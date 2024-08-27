@@ -79,6 +79,9 @@ export default function controller() {
 
   // Methods
   const methods = {
+    endMove(e) {
+      console.warn(e)
+    },
     toggleDynamicFilterModal() {
       state.showDynamicFilterModal = !state.showDynamicFilterModal;
     },

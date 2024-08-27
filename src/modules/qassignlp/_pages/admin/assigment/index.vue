@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="assigns">
     <page-actions
       :excludeActions="excludeActions"
       :title="$tr($route.meta.title)"
@@ -22,7 +22,7 @@
       @update:summary="summary => dynamicFilterSummary = summary"
     />
 
-    <div class="tw-sticky tw-top-0 tw-flex tw-items-center tw-p-2 tw-bg-gray-50 tw-shadow-md tw-z-10">
+    <div class="tw-sticky top-info tw-flex tw-items-center tw-p-2 tw-shadow-xs tw-z-10 tw-mb-2 bg-white">
       <div class="tw-text-sm tw-font-semibold">
         # of Appointments:
         <span class="text-primary">{{ totalAssigns }}</span>
@@ -34,14 +34,14 @@
     </div>
 
     <section class="tw-w-full tw-flex tw-flex-wrap md:tw-flex-nowrap tw-gutter-sm md:tw-gutter-md tw-gap-4">
-<!--      <div class="tw-w-full md:tw-w-[40%] md:tw-order-2">-->
-<!--        Hola-->
-<!--      </div>-->
+      <div class="tw-w-full md:tw-w-[40%] md:tw-order-2">
+        <kanban title="morning" :kanban-props="{itemKey: 'id'}" :list="[{row: assignedData[1], col: columns[1]}, {row: assignedData[2], col: columns[1]}]" @endDrag="endMove" />
+      </div>
       <dynamic-table-clone
         :columns="columns"
         :rows="assignedData"
         :loading="loading"
-        class="tw-w-full md:tw-w-[100%] md:tw-order-1"
+        class="tw-w-full md:tw-w-[60%] md:tw-order-1"
       />
     </section>
 
@@ -52,10 +52,12 @@ import {defineComponent} from 'vue';
 import controller from './controller';
 import dynamicFilter from 'modules/qsite/_components/master/dynamicFilter';
 import dynamicTableClone from 'modules/qassignlp/_components/dynamicTableClone/index.vue';
+import kanban from 'modules/qassignlp/_components/kanbanUnAssigns/index.vue'
 
 export default defineComponent({
   props: {},
   components: {
+    kanban,
     dynamicFilter,
     dynamicTableClone
   },
@@ -65,4 +67,13 @@ export default defineComponent({
 });
 </script>
 <style lang="scss">
+#assigns {
+  .top-info {
+    top: 100px;
+
+    @media screen and (max-width: $breakpoint-md) {
+      top: 0px;
+    }
+  }
+}
 </style>

@@ -15,7 +15,7 @@ export default {
   },
   prevAssigments: {
     permission: 'ileads.assigments.manage',
-    activated: true,
+    activated: false,
     authenticated: true,
     path: '/lead/prev-appointments',
     name: 'qassignlp.admin.prevAssigments',
