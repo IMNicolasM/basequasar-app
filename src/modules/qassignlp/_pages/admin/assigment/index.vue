@@ -34,15 +34,15 @@
     </div>
 
     <section class="tw-w-full tw-flex tw-flex-wrap md:tw-flex-nowrap tw-gutter-sm md:tw-gutter-md tw-gap-4">
-      <div class="tw-w-full md:tw-w-[40%] md:tw-order-2">
-        <kanban title="morning" :kanban-props="{itemKey: 'id'}" :list="[{row: assignedData[1], col: columns[1]}, {row: assignedData[2], col: columns[1]}]" @endDrag="endMove" />
+      <div class="tw-w-full md:tw-w-[50%] md:tw-order-2">
+        <kanban :kanban-props="{itemKey: 'id', animation: '200'}" :columns="columnsSlot" :rows="unAssignedData" @endDrag="endMove" />
       </div>
-      <dynamic-table-clone
-        :columns="columns"
-        :rows="assignedData"
-        :loading="loading"
-        class="tw-w-full md:tw-w-[60%] md:tw-order-1"
-      />
+<!--      <dynamic-table-clone-->
+<!--        :columns="columns"-->
+<!--        :rows="assignedData"-->
+<!--        :loading="loading"-->
+<!--        class="tw-w-full md:tw-w-[50%] md:tw-order-1"-->
+<!--      />-->
     </section>
 
   </div>

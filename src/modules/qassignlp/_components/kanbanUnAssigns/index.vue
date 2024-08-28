@@ -1,27 +1,29 @@
 <template>
-  <div id="dynamic-kanban">
-    <div v-if="title" class="kanban-title text-center text-capitalize">
-      <p>{{ title }}</p>
+  <div id="dynamic-kanban" class="flex gap-3">
+    <div v-for="column of columns" class="tw-min-w-20 tw-w-36 tw-p-2 tw-bg-gray-50 tw-rounded-md tw-shadow-md">
+      <div v-if="column.label" class="kanban-title text-center text-capitalize">
+        <p>{{ column.label }}</p>
+      </div>
+      <draggable
+        v-bind="kanbanProps"
+        :list="rows[column.field]"
+        @start="dragColumn = true"
+        @end="show"
+        :move="show"
+      >
+        <template #item="{ element }">
+          <div>
+            <q-inner-loading v-if="loading" showing color="primary"/>
+            <!-- dynamic content  -->
+            <contentType
+              :v-else="!loading"
+              :col="column"
+              :row="element"
+            />
+          </div>
+        </template>
+      </draggable>
     </div>
-    <draggable
-      v-bind="kanbanProps"
-      :list="list"
-      @start="(val) => show('startDrag',val)"
-      @end="(val) => show(val)"
-      @change="(val) => show('changeDrag', val)"
-    >
-      <template #item="{ element }">
-        <div>
-          <q-inner-loading v-if="loading" showing color="primary"/>
-          <!-- dynamic content  -->
-          <contentType
-            :v-else="!loading"
-            :col="element.col"
-            :row="element.row"
-          />
-        </div>
-      </template>
-    </draggable>
   </div>
 </template>
 <script lang="ts">
@@ -34,15 +36,15 @@ export default defineComponent({
   props: {
     kanbanProps: {default: null},
     loading: {default: false},
-    title: {default: ''},
-    list: {default: []},
+    rows: {default: []},
+    columns: {default: []},
     actions: {default: []}
   },
   components: {
     draggable,
-    contentType,
+    contentType
   },
-  emits: ['startDrag', 'endDrag', 'changeDrag'],
+  //emits: ['startDrag', 'endDrag', 'changeDrag'],
   setup(props, {emit}) {
     return controller(props, emit)
   },

@@ -1,11 +1,13 @@
-import {reactive, toRefs, computed} from 'vue';
+import {reactive, toRefs, computed, onMounted} from 'vue';
 import {i18n, moment, alert, helper, clone} from 'src/plugins/utils'
 import service from './services'
 import getName from './getName.vue'
+import simpleCard from '../../../_components/simpleCard/index.vue'
 
 const dateFormat = 'YYYY/MM/DD'
 const assingRoute = 'apiRoutes.qassignlp.assignments'
 const followRoute = 'apiRoutes.qassignlp.followups'
+const leadsRoute = 'apiRoutes.qassignlp.leads'
 
 export default function controller() {
 
@@ -61,12 +63,15 @@ export default function controller() {
       }
     },
     assignedData: [],
+    unAssignedData: {},
+    columnsSlot: [
+      {name: 'slot1', label: i18n.tr('ileads.cms.form.morning'), field: 'slot1', align: 'center', borderColor: '#36d7b7', component: simpleCard},
+      {name: 'slot2', label: i18n.tr('ileads.cms.form.afternoon'), field: 'slot2', align: 'center', component: simpleCard, borderColor: '#e08283'},
+      {name: 'slot3', label: i18n.tr('ileads.cms.form.lateAfternoon'), field: 'slot3', align: 'center', component: simpleCard, borderColor: '#7bbcf5'},
+      {name: 'slot4', label: i18n.tr('ileads.cms.form.evening'), field: 'slot4', align: 'center', component: simpleCard, borderColor: '#a0a0ef'},
+    ],
     columns: [
-      {name: 'brnId', label: i18n.tr('ileads.cms.form.slrName'), field: 'brnId', align: 'rigth', component: getName},
-      {name: 'slot1', label: i18n.tr('ileads.cms.form.morning'), field: 'slot1', align: 'center', draggable: true, borderColor: '#36d7b7'},
-      {name: 'slot2', label: i18n.tr('ileads.cms.form.afternoon'), field: 'slot2', align: 'center', draggable: true, borderColor: '#e08283'},
-      {name: 'slot3', label: i18n.tr('ileads.cms.form.lateAfternoon'), field: 'slot3', align: 'center', draggable: true, borderColor: '#7bbcf5'},
-      {name: 'slot4', label: i18n.tr('ileads.cms.form.evening'), field: 'slot4', align: 'center', draggable: true, borderColor: '#a0a0ef'},
+      {name: 'brnId', label: i18n.tr('ileads.cms.form.slrName'), field: 'brnId', align: 'rigth', component: getName}
     ]
   });
 
@@ -99,14 +104,20 @@ export default function controller() {
 
       let total = 0
       let totalMiles = 0
+      let leads = [];
+      const idsAssigns = [];
       let mappedData = {}
 
       await Promise.all([
         methods.getAssignedLeads(refresh, params),
-        methods.getFollowups(refresh, params)
+        methods.getFollowups(refresh, params),
+        methods.getAllLeads(refresh, params)
       ]).then((res: any) => {
         res.forEach(r => {
 
+          if(r.leads) {
+            leads = r.leads
+          }
           r.data.forEach(a => {
             const slrId = a.slr_id
 
@@ -125,7 +136,7 @@ export default function controller() {
                 slot4: []
               }
             }
-
+            idsAssigns.push(parseInt(a.lead_id))
             mappedData[slrId][`slot${a.slot}`].push(camelCaseResponse)
           })
           total += r.total
@@ -136,6 +147,22 @@ export default function controller() {
 
       const assignedData = valuesMap.sort((a,b) => a.brnId.localeCompare(b.brnId))
       state.assignedData = assignedData
+      //state.unAssignedData =
+      const unAssigns = leads.filter(l => !idsAssigns.includes(l.id));
+
+      let mappedUnAssigns = {}
+
+      unAssigns.forEach(u => {
+        let nameSlot = `slot${u.slot}`
+        const camelCaseResponse = helper.snakeToCamelCaseKeys(u)
+        if (!mappedUnAssigns[nameSlot]) {
+          mappedUnAssigns[nameSlot] = []
+        }
+        mappedUnAssigns[nameSlot].push(camelCaseResponse)
+      })
+
+      console.warn(mappedUnAssigns)
+      state.unAssignedData = mappedUnAssigns
       state.totalMiles = totalMiles
       state.totalAssigns = total
 
@@ -147,6 +174,17 @@ export default function controller() {
           const total = response.meta.page.total
 
           resolve({data: response.data, total})
+
+        }).catch((e) => {
+          alert.error(i18n.tr('isite.cms.message.errorRequest'))
+          reject(e)
+        });
+      })
+    },
+    getAllLeads(refresh, params) {
+      return new Promise((resolve, reject) => {
+        service.getData(leadsRoute, refresh, params).then(response => {
+          resolve({data: [], total: 0, leads: response.data})
 
         }).catch((e) => {
           alert.error(i18n.tr('isite.cms.message.errorRequest'))
@@ -168,6 +206,13 @@ export default function controller() {
       })
     }
   };
+
+  onMounted(() => {
+    state.columns = [
+      ...state.columns,
+      ...state.columnsSlot
+    ]
+  })
 
   return {...refs, ...(toRefs(state)), ...computeds, ...methods};
 }

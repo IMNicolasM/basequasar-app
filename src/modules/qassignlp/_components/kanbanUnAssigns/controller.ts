@@ -21,24 +21,12 @@ export default function controller(props, emit) {
   // States
   const state = reactive({
     // Key: Default Value
-
+    dragColumn: false
   })
 
   // Computed
   const computeds = {
-    // key: computed(() => {})
-
-    //pagination: computed(() => props.pagination),
-
-
-
-    rowsPerPageOption: computed(() => [5, 10, 20, 50, 100, 300, 500]),
-    /*
-    windowSize: computed(() => props.window >= '500' ? 'desktop' : 'mobile'),
-     //showPagination
-    showPagination: computed(() => computeds.windowSize == 'desktop' && props.pagination.pagesNumber > 1)
-    //showPagination: computed(() => true)
-    */
+    rowsPerPageOption: computed(() => [5, 10, 20, 50, 100, 300, 500])
   }
 
 
@@ -55,7 +43,7 @@ export default function controller(props, emit) {
       return `${start} - ${end} ${i18n.tr('isite.cms.label.of')} ${totalPage}`
     },
     show(e) {
-      console.warn(e)
+      console.warn("HEYYYYYOOOO", e)
     }
   }
 
