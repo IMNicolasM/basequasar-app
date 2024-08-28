@@ -37,12 +37,12 @@
       <div class="tw-w-full md:tw-w-[50%] md:tw-order-2">
         <kanban :kanban-props="{itemKey: 'id', animation: '200'}" :columns="columnsSlot" :rows="unAssignedData" @endDrag="endMove" />
       </div>
-<!--      <dynamic-table-clone-->
-<!--        :columns="columns"-->
-<!--        :rows="assignedData"-->
-<!--        :loading="loading"-->
-<!--        class="tw-w-full md:tw-w-[50%] md:tw-order-1"-->
-<!--      />-->
+      <dynamic-table-clone
+        :columns="columns"
+        :rows="assignedData"
+        :loading="loading"
+        class="tw-w-full md:tw-w-[50%] md:tw-order-1"
+      />
     </section>
 
   </div>

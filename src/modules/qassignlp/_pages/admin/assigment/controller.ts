@@ -208,9 +208,18 @@ export default function controller() {
   };
 
   onMounted(() => {
+    const slotColumns = []
+
+    for (const slotColumn of state.columnsSlot) {
+      const column: any = clone(slotColumn)
+
+      delete column.component
+      slotColumns.push({...column, draggable: true})
+    }
+
     state.columns = [
       ...state.columns,
-      ...state.columnsSlot
+      ...slotColumns
     ]
   })
 
