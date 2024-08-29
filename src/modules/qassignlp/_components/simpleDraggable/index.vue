@@ -1,6 +1,6 @@
 <template>
   <div id="dynamic-kanban" class="flex gap-3">
-    <div v-for="column in columns" class="tw-min-w-20 tw-w-36 tw-p-2 tw-bg-gray-50 tw-rounded-md tw-shadow-md">
+    <div v-for="column of columns" class="tw-min-w-20 tw-w-36 tw-p-2 tw-bg-gray-50 tw-rounded-md tw-shadow-md">
       <div v-if="column.label" class="kanban-title text-center text-capitalize">
         <p>{{ column.label }}</p>
       </div>
@@ -16,7 +16,6 @@
             <q-inner-loading v-if="loading" showing color="primary"/>
             <!-- dynamic content  -->
             <contentType
-              class="cursor-pointer"
               :v-else="!loading"
               :col="column"
               :row="element"

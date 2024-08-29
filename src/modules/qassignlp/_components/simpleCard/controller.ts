@@ -1,4 +1,5 @@
 import {reactive,toRefs} from "vue";
+import {i18n} from "../../../../plugins/utils";
 
 export default function controller(props, emit) {
 
@@ -8,7 +9,17 @@ export default function controller(props, emit) {
   }
 
   // States
-  const state = reactive({})
+  const state = reactive({
+    COLORS: {
+      Verif: 'red',
+      Set: 'red'
+    },
+    GRADE_COLORS: {
+      5: 'green',
+      3: '#df7315',
+      2: 'blue'
+    }
+  })
 
   // Computed
   const computeds = {}

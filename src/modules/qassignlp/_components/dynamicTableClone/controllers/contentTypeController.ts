@@ -19,7 +19,6 @@ export default function controller(props, emit) {
     //data to display
     data: computed(() => props.col?.format ? props.col.format(props.row[props.col.name]) : props.row[props.col.name]),
     isComponent: computed(() => props.col?.component || false ),
-    isDraggable: computed(() => props.col?.draggable || false ),
     isLoading: computed(() => props.row?.isLoading || false),
     showOnLoading: computed(() =>  computeds.isLoading.value && props.col.name != 'id')
   }

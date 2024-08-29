@@ -3,10 +3,9 @@ import {i18n, moment, alert, helper, clone} from 'src/plugins/utils'
 import service from './services'
 import getName from './getName.vue'
 import simpleCard from '../../../_components/simpleCard/index.vue'
+import assign from '../../../_components/assigns/index.vue'
 
 const dateFormat = 'YYYY/MM/DD'
-const followRoute = 'apiRoutes.qassignlp.followups'
-const leadsRoute = 'apiRoutes.qassignlp.leads'
 
 export default function controller() {
 
@@ -119,20 +118,28 @@ export default function controller() {
         leads = leadsResponse.data
         const assigns = assignments.data
 
-        const initializeMappedData = (id, name = '', brnId = '') => ({
-          slrId: id,
-          slrName: name,
-          brnId,
-          ...methods.initializeSlots(),
-        });
+        const followups = leads.filter(l => l.is_follow_up)
+
+        for (const follow of followups) {
+          const {slr_id, id, slot} = follow
+          if (!mappedData[slr_id]) {
+            mappedData[slr_id] = methods.initializeMappedData(slr_id);
+          }
+          idsAssigns.push(parseInt(id));
+
+          const leadInfo = {
+            ...helper.snakeToCamelCaseKeys(follow)
+          }
+          mappedData[slr_id][`slot${slot}`].data.push(leadInfo);
+        }
 
         for (const assign of assigns) {
-          const { slr_id, lead_id, slot, distance } = assign;
-
+          let { slr_id , lead_id, slot, distance } = assign;
+          slr_id = parseInt(slr_id)
           if (!mappedData[slr_id]) {
-            mappedData[slr_id] = initializeMappedData(slr_id);
+            mappedData[slr_id] = methods.initializeMappedData(slr_id);
           }
-
+          if(slr_id == 8053 || slr_id == 4993)console.warn({assign})
           const findLead = leads.find(l => l.id == lead_id);
           if (!findLead) {
             alert.warning(`Not found lead with ID: ${lead_id}`);
@@ -142,23 +149,27 @@ export default function controller() {
           totalMiles += parseInt(distance || 0);
           idsAssigns.push(parseInt(lead_id));
 
-          mappedData[slr_id][`slot${slot}`].data.push(helper.snakeToCamelCaseKeys(findLead));
+          const leadInfo = {
+            ...helper.snakeToCamelCaseKeys(findLead),
+            slrId: slr_id,
+            distance: distance || 0
+          }
+          mappedData[slr_id][`slot${slot}`].data.push(leadInfo);
         }
 
         for (const emp of emps) {
           const { id, FirstName, LastName, brn_id, tms_id } = emp;
-
           if (filterBrn !== 'ALL' && (filterBrn !== brn_id && !mappedData[id])) continue;
+          if(!mappedData[id] && tms_id == null) continue
 
           if (!mappedData[id]) {
-            mappedData[id] = initializeMappedData(id, `${LastName}, ${FirstName}`, brn_id);
+            mappedData[id] = methods.initializeMappedData(id, `${LastName}, ${FirstName}`, brn_id);
           }
 
-          if (filterBrn !== 'ALL' && mappedData[id]) {
-            mappedData[id].slrName = `${LastName}, ${FirstName}`;
-            mappedData[id].brnId = brn_id;
-          }
+          mappedData[id].slrName = `${LastName}, ${FirstName}`;
+          mappedData[id].brnId = brn_id;
 
+          if(tms_id == null) continue
           mappedData[id][`slot${tms_id}`].active = true;
         }
 
@@ -172,7 +183,6 @@ export default function controller() {
 
       const assignedData = valuesMap.sort((a,b) => a.brnId.localeCompare(b.brnId))
       state.assignedData = assignedData
-      //state.unAssignedData =
       const unAssigns = leads.filter(l => !idsAssigns.includes(l.id));
 
       let mappedUnAssigns = {}
@@ -180,9 +190,9 @@ export default function controller() {
       unAssigns.forEach(u => {
         let nameSlot = `slot${u.slot}`
         const camelCaseResponse = helper.snakeToCamelCaseKeys(u)
-        if (!mappedUnAssigns[nameSlot]) {
-          mappedUnAssigns[nameSlot] = []
-        }
+
+        if(!mappedUnAssigns[nameSlot]) mappedUnAssigns[nameSlot] = []
+
         mappedUnAssigns[nameSlot].push(camelCaseResponse)
       })
 
@@ -194,6 +204,14 @@ export default function controller() {
     },
     mappedDataToKanban(data: any) {
 
+    },
+    initializeMappedData(id, name = '', brnId = '') {
+      return {
+        slrId: id,
+        slrName: name,
+        brnId,
+        ...methods.initializeSlots(),
+      }
     },
     initializeSlots() {
       return {
@@ -211,8 +229,7 @@ export default function controller() {
     for (const slotColumn of state.columnsSlot) {
       const column: any = clone(slotColumn)
 
-      delete column.component
-      slotColumns.push({...column, draggable: true})
+      slotColumns.push({...column, component: assign})
     }
 
     state.columns = [
