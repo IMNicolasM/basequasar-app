@@ -5,7 +5,6 @@ import getName from './getName.vue'
 import simpleCard from '../../../_components/simpleCard/index.vue'
 
 const dateFormat = 'YYYY/MM/DD'
-const assingRoute = 'apiRoutes.qassignlp.assignments'
 const followRoute = 'apiRoutes.qassignlp.followups'
 const leadsRoute = 'apiRoutes.qassignlp.leads'
 
@@ -96,11 +95,13 @@ export default function controller() {
     },
     async getData(refresh = false, filter = {}) {
       state.loading = true
-      let otherFilters = state.dynamicFilterValues
+      let otherFilters: any = state.dynamicFilterValues
       const params: any = {
         filter: {...(otherFilters || {}), ...(filter || {}), order: {way: 'asc', field: 'brn_id'}},
         take: 1000
       }
+
+      const filterBrn = otherFilters.brn_id
 
       let total = 0
       let totalMiles = 0
@@ -109,39 +110,63 @@ export default function controller() {
       let mappedData = {}
 
       await Promise.all([
-        methods.getAssignedLeads(refresh, params),
-        methods.getFollowups(refresh, params),
-        methods.getAllLeads(refresh, params)
-      ]).then((res: any) => {
-        res.forEach(r => {
+        service.getData('apiRoutes.qassignlp.employees', refresh, params),
+        service.getData('apiRoutes.qassignlp.leads', refresh, params),
+        service.getData('apiRoutes.qassignlp.assignments', refresh, params)
+      ]).then(([employees, leadsResponse, assignments]) => {
+        //console.warn(employees, leads, assignments)
+        const emps = employees.data
+        leads = leadsResponse.data
+        const assigns = assignments.data
 
-          if(r.leads) {
-            leads = r.leads
+        const initializeMappedData = (id, name = '', brnId = '') => ({
+          slrId: id,
+          slrName: name,
+          brnId,
+          ...methods.initializeSlots(),
+        });
+
+        for (const assign of assigns) {
+          const { slr_id, lead_id, slot, distance } = assign;
+
+          if (!mappedData[slr_id]) {
+            mappedData[slr_id] = initializeMappedData(slr_id);
           }
-          r.data.forEach(a => {
-            const slrId = a.slr_id
 
-            const camelCaseResponse = helper.snakeToCamelCaseKeys(a)
+          const findLead = leads.find(l => l.id == lead_id);
+          if (!findLead) {
+            alert.warning(`Not found lead with ID: ${lead_id}`);
+            continue;
+          }
 
-            totalMiles += parseInt(a.distance || 0)
+          totalMiles += parseInt(distance || 0);
+          idsAssigns.push(parseInt(lead_id));
 
-            if (!mappedData[slrId]) {
-              mappedData[slrId] = {
-                slrName: a.slr_name,
-                slrBrn: a.sal_brn,
-                brnId: a.brn_id,
-                slot1: [],
-                slot2: [],
-                slot3: [],
-                slot4: []
-              }
-            }
-            idsAssigns.push(parseInt(a.lead_id))
-            mappedData[slrId][`slot${a.slot}`].push(camelCaseResponse)
-          })
-          total += r.total
-        })
-      }).catch(e => console.log(e))
+          mappedData[slr_id][`slot${slot}`].data.push(helper.snakeToCamelCaseKeys(findLead));
+        }
+
+        for (const emp of emps) {
+          const { id, FirstName, LastName, brn_id, tms_id } = emp;
+
+          if (filterBrn !== 'ALL' && (filterBrn !== brn_id && !mappedData[id])) continue;
+
+          if (!mappedData[id]) {
+            mappedData[id] = initializeMappedData(id, `${LastName}, ${FirstName}`, brn_id);
+          }
+
+          if (filterBrn !== 'ALL' && mappedData[id]) {
+            mappedData[id].slrName = `${LastName}, ${FirstName}`;
+            mappedData[id].brnId = brn_id;
+          }
+
+          mappedData[id][`slot${tms_id}`].active = true;
+        }
+
+        total += assignments?.meta?.page?.total || 0
+      }).catch(e => {
+        alert.error(i18n.tr('isite.cms.message.errorRequest'))
+        console.error(e)
+      })
 
       const valuesMap: any = Object.values(mappedData || {})
 
@@ -161,49 +186,22 @@ export default function controller() {
         mappedUnAssigns[nameSlot].push(camelCaseResponse)
       })
 
-      console.warn(mappedUnAssigns)
       state.unAssignedData = mappedUnAssigns
       state.totalMiles = totalMiles
       state.totalAssigns = total
 
       state.loading = false
     },
-    getFollowups(refresh, params) {
-      return new Promise((resolve, reject) => {
-        service.getData(followRoute, refresh, params).then(response => {
-          const total = response.meta.page.total
+    mappedDataToKanban(data: any) {
 
-          resolve({data: response.data, total})
-
-        }).catch((e) => {
-          alert.error(i18n.tr('isite.cms.message.errorRequest'))
-          reject(e)
-        });
-      })
     },
-    getAllLeads(refresh, params) {
-      return new Promise((resolve, reject) => {
-        service.getData(leadsRoute, refresh, params).then(response => {
-          resolve({data: [], total: 0, leads: response.data})
-
-        }).catch((e) => {
-          alert.error(i18n.tr('isite.cms.message.errorRequest'))
-          reject(e)
-        });
-      })
-    },
-    getAssignedLeads(refresh, params) {
-      return new Promise((resolve, reject) => {
-        service.getData(assingRoute, refresh, params).then(response => {
-          const total = response.meta.page.total
-
-          resolve({data: response.data, total})
-
-        }).catch((e) => {
-          alert.error(i18n.tr('isite.cms.message.errorRequest'))
-          reject(e)
-        });
-      })
+    initializeSlots() {
+      return {
+        slot1: { active: false, data: [] },
+        slot2: { active: false, data: [] },
+        slot3: { active: false, data: [] },
+        slot4: { active: false, data: [] },
+      }
     }
   };
 

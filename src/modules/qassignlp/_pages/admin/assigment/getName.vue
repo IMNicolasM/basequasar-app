@@ -1,6 +1,6 @@
 <template>
   <div class="tw-text-center">
-    <span class="tw-font-bold">{{ row.slrBrn }}</span>
+    <span class="tw-font-bold">{{ row.brnId }}</span>
     <br/>
     {{ row.slrName }}
   </div>

@@ -1,24 +1,20 @@
 <template>
   <!--cell content-->
-  <div :style="col?.style">
+  <div :style="col?.style" :class="data.active === false ? 'tw-bg-gray-300 tw-py-2 tw-px-4 tw-rounded-md tw-text-center tw-font-semibold tw-text-gray-800' : ''">
+    <div v-if="data.active === false">
+      Not on Schedule
+    </div>
     <!--      @change="reorderColumns"-->
     <draggable
       class="tw-flex wrap tw-items-center tw-justify-center tw-max-w-36"
       v-if="isDraggable"
-      :list="data"
+      :list="data.data"
       group="table"
       item-key="slrName"
     >
       <template #item="{ element }">
         <div class="cursor-pointer">
-          <q-card bordered class="tw-w-34 tw-border-l-2" :style="{ borderLeftColor: col.borderColor }">
-            <q-card-section class="wrap q-pa-sm tw-text-[10px]">
-              <div class="tw-font-bold tw-text-gray-800" style="white-space: normal; word-wrap: break-word;">{{element.brnId}}: {{ element.csz }}</div>
-              <div class="tw-font-bold text-secondary tw-text-xs" v-if="element.followupdate">Followup</div>
-              <div class="tw-font-semibold tw-text-gray-600">{{ $trd(element.apptClockTime, {type: 'time'}) }}</div>
-              <div class="tw-font-semibold tw-text-gray-600" v-if="element.distance">({{ parseInt(element.distance) }} mi / {{ getDriveTime(element.distance) }} mins)</div>
-            </q-card-section>
-          </q-card>
+          <simple-card :row="element" :col="col" />
         </div>
       </template>
     </draggable>
@@ -39,9 +35,10 @@
 import {defineComponent} from 'vue'
 import controller from '../controllers/contentTypeController'
 import draggable from "vuedraggable";
+import simpleCard from '../../simpleCard/index.vue'
 
 export default defineComponent({
-  components: {draggable},
+  components: {draggable, simpleCard},
   props: {
     col: {default: []},
     row: {default: []}
