@@ -10,5 +10,6 @@ export default {
   leads: `${urlBase}/leads`,
   employees: `${urlBase}/employees`,
   branches: `${urlBase}/branches`,
-  followups: `${urlBase}/followups`
+  followups: `${urlBase}/followups`,
+  rank: `${urlBase}/rank`,
 }

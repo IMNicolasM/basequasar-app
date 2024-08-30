@@ -1,7 +1,7 @@
 <template>
-  <div id="dynamic-kanban" class="flex gap-3">
-    <div v-for="column in columns" class="tw-min-w-20 tw-w-36 tw-p-2 tw-bg-gray-50 tw-rounded-md tw-shadow-md">
-      <div v-if="column.label" class="kanban-title text-center text-capitalize">
+  <div id="dynamic-kanban" class="flex gap-3 tw-overflow-x-auto tw-whitespace-nowrap no-wrap">
+    <div v-for="column in columns" class="tw-min-w-24 tw-w-36 tw-p-2">
+      <div v-if="column.label" class="kanban-title text-center text-capitalize tw-pb-4">
         <p>{{ column.label }}</p>
       </div>
       <draggable

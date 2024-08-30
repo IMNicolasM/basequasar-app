@@ -22,27 +22,39 @@
       @update:summary="summary => dynamicFilterSummary = summary"
     />
 
-    <div class="tw-sticky top-info tw-flex tw-items-center tw-p-2 tw-shadow-xs tw-z-10 tw-mb-2 bg-white">
-      <div class="tw-text-sm tw-font-semibold">
-        # of Appointments:
-        <span class="text-primary">{{ totalAssigns }}</span>
-      </div>
-      <div class="tw-text-sm tw-ml-8 tw-font-semibold">
-        Miles Driven:
-        <span class="text-primary">{{ totalMiles }}</span>
-      </div>
-    </div>
-
     <section class="tw-w-full tw-flex tw-flex-wrap md:tw-flex-nowrap tw-gutter-sm md:tw-gutter-md tw-gap-4">
-      <div class="tw-w-full md:tw-w-[50%] md:tw-order-2">
+      <div class="tw-w-full md:tw-w-[50%]">
+        <div class="tw-sticky top-info tw-flex tw-items-center tw-p-2 tw-shadow-xs tw-z-10 tw-my-3 bg-white">
+          <div class="tw-text-sm tw-font-semibold">
+            # of Appointments:
+            <span class="text-primary">{{ totalAssigns }}</span>
+          </div>
+          <div class="tw-text-sm tw-ml-8 tw-font-semibold">
+            Miles Driven:
+            <span class="text-primary">{{ totalMiles }}</span>
+          </div>
+        </div>
+        <dynamic-table-clone
+          :columns="columns"
+          :rows="assignedData"
+          :loading="loading"
+        />
+      </div>
+      <div class="tw-w-full md:tw-w-[50%] scroll-x">
+        <div class="row q-col-gutter-x-sm" style="display: flex; flex-wrap: wrap;">
+          <template v-for="(field, key) in fieldsUnAssign" :key="key">
+            <div class="col-12 col-md-4">
+              <dynamic-field
+                v-model="filtersUnassign[field.name || key]"
+                :field="field"
+                @update:modelValue="filterUnAssign"
+              />
+            </div>
+          </template>
+        </div>
+
         <kanban :kanban-props="{itemKey: 'id', animation: '200'}" :columns="columnsSlot" :rows="unAssignedData" @endDrag="endMove" />
       </div>
-      <dynamic-table-clone
-        :columns="columns"
-        :rows="assignedData"
-        :loading="loading"
-        class="tw-w-full md:tw-w-[50%] md:tw-order-1"
-      />
     </section>
 
   </div>

@@ -1,4 +1,4 @@
-import {reactive, toRefs, computed, onMounted} from 'vue';
+import {reactive, toRefs, computed, onMounted, watch} from 'vue';
 import {i18n, moment, alert, helper, clone} from 'src/plugins/utils'
 import service from './services'
 import getName from './getName.vue'
@@ -60,8 +60,10 @@ export default function controller() {
         }
       }
     },
+    filtersUnassign: {},
     assignedData: [],
     unAssignedData: {},
+    allUnAssign: {},
     columnsSlot: [
       {name: 'slot1', label: i18n.tr('ileads.cms.form.morning'), field: 'slot1', align: 'center', borderColor: '#36d7b7', component: simpleCard},
       {name: 'slot2', label: i18n.tr('ileads.cms.form.afternoon'), field: 'slot2', align: 'center', component: simpleCard, borderColor: '#e08283'},
@@ -70,7 +72,55 @@ export default function controller() {
     ],
     columns: [
       {name: 'brnId', label: i18n.tr('ileads.cms.form.slrName'), field: 'brnId', align: 'rigth', component: getName}
-    ]
+    ],
+    fieldsUnAssign: {
+      brnId: {
+        value: 'ALL',
+        type: 'select',
+        props: {
+          label: i18n.tr('ileads.cms.form.brnId'),
+          options: [
+            { label: '-- ALL --', value: 'ALL' }
+          ]
+        },
+        loadOptions: {
+          apiRoute: 'apiRoutes.qassignlp.branches',
+          select: {label: 'ShortName', id: 'ShortName'} //{label: 'LongName', id: 'ShortName'}
+        }
+      },
+      dspId: {
+        value: 'ALL',
+        type: 'select',
+        props: {
+          label: i18n.tr('ileads.cms.form.dspId'),
+          options: [
+            { label: '-- ALL --', value: 'ALL' },
+            { label: 'Set', value: 'Set' },
+            { label: 'Verif', value: 'Verif' },
+            { label: 'Cnf', value: 'Cnf' },
+            { label: 'NoVerif', value: 'NoVerif' },
+            { label: 'NoCnf', value: 'NoCnf' },
+            { label: 'UnCon', value: 'UnCon' },
+            { label: 'Issue', value: 'Issue' }
+          ]
+        }
+      },
+      rnkId: {
+        value: 'ALL',
+        type: 'select',
+        props: {
+          label: i18n.tr('ileads.cms.form.rnkId'),
+          options: [
+            { label: '-- ALL --', value: 'ALL' }
+          ]
+        },
+        loadOptions: {
+          apiRoute: 'apiRoutes.qassignlp.rank',
+          select: {label: 'descr', id: 'id'},
+          requestParams: {filter: {active: true}}
+        }
+      },
+    },
   });
 
   // Computed
@@ -113,7 +163,6 @@ export default function controller() {
         service.getData('apiRoutes.qassignlp.leads', refresh, params),
         service.getData('apiRoutes.qassignlp.assignments', refresh, params)
       ]).then(([employees, leadsResponse, assignments]) => {
-        //console.warn(employees, leads, assignments)
         const emps = employees.data
         leads = leadsResponse.data
         const assigns = assignments.data
@@ -139,7 +188,6 @@ export default function controller() {
           if (!mappedData[slr_id]) {
             mappedData[slr_id] = methods.initializeMappedData(slr_id);
           }
-          if(slr_id == 8053 || slr_id == 4993)console.warn({assign})
           const findLead = leads.find(l => l.id == lead_id);
           if (!findLead) {
             alert.warning(`Not found lead with ID: ${lead_id}`);
@@ -196,14 +244,28 @@ export default function controller() {
         mappedUnAssigns[nameSlot].push(camelCaseResponse)
       })
 
-      state.unAssignedData = mappedUnAssigns
+      state.allUnAssign = mappedUnAssigns
       state.totalMiles = totalMiles
       state.totalAssigns = total
 
       state.loading = false
     },
-    mappedDataToKanban(data: any) {
+    filterUnAssign() {
+      const filteredUnAssign: any = {}
+      const filters = state.filtersUnassign;
+      const unassingn = state.allUnAssign;
 
+      for (const key in filters) {
+        const value = filters[key]
+        if(key) {
+          for (const uKey in unassingn) {
+            const res = unassingn[uKey]
+            filteredUnAssign[uKey] = value == 'ALL' ? res : res.filter(u => u[key] == value)
+          }
+        }
+      }
+
+      state.unAssignedData = filteredUnAssign
     },
     initializeMappedData(id, name = '', brnId = '') {
       return {
@@ -222,6 +284,10 @@ export default function controller() {
       }
     }
   };
+
+  watch(() => state.allUnAssign, (newValue) => {
+    methods.filterUnAssign()
+  })
 
   onMounted(() => {
     const slotColumns = []

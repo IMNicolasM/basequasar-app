@@ -16,7 +16,9 @@ export default {
         'afternoon': 'Afternoon',
         'lateAfternoon': 'Late Afternoon',
         'evening': 'Evening',
-        'brnId': 'Market'
+        'brnId': 'Market',
+        'rnkId': 'Rnk Id',
+        'dspId': 'Dsp Id'
       },
       'messages': {
         'reassign': 'Reassign'
