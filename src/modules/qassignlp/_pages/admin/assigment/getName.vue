@@ -1,5 +1,5 @@
 <template>
-  <div class="tw-text-center">
+  <div class="tw-text-center"  style="white-space: normal; word-wrap: break-word;">
     <span class="tw-font-bold">{{ row.brnId }}</span>
     <br/>
     {{ row.slrName }}

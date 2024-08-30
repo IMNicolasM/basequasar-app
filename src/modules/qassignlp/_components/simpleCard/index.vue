@@ -1,5 +1,5 @@
 <template>
-  <q-card bordered class="tw-w-34 tw-border-l-2 tw-text-[9px]" :style="{ borderLeftColor: col?.borderColor }">
+  <q-card bordered class="tw-border-l-2 tw-text-[9px]" :style="{ borderLeftColor: col?.borderColor }">
     <q-card-section class="wrap q-px-sm q-pt-xs q-pb-none">
       <div class="tw-font-bold tw-text-gray-800" style="white-space: normal; word-wrap: break-word;">
         {{ row?.brnId }}: {{ row?.city }}, {{ row.state }} - <span :style="{color: COLORS[row?.dspId] || 'black'}">{{ row?.dspId }}</span>

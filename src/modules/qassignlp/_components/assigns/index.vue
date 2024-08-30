@@ -5,7 +5,7 @@
       Not on Schedule
     </div>
     <draggable
-      class="tw-flex wrap tw-items-center tw-justify-center tw-max-w-36"
+      class="tw-flex wrap tw-items-center tw-justify-center tw-max-w-30 lg:tw-max-w-36"
       :list="data.data"
       group="table"
       item-key="slrName"

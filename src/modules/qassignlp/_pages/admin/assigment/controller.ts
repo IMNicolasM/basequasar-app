@@ -71,7 +71,7 @@ export default function controller() {
       {name: 'slot4', label: i18n.tr('ileads.cms.form.evening'), field: 'slot4', align: 'center', component: simpleCard, borderColor: '#a0a0ef'},
     ],
     columns: [
-      {name: 'brnId', label: i18n.tr('ileads.cms.form.slrName'), field: 'brnId', align: 'rigth', component: getName}
+      {name: 'brnId', label: i18n.tr('ileads.cms.form.slrName'), field: 'brnId', align: 'rigth', component: getName, class:'dense-column'}
     ],
     fieldsUnAssign: {
       brnId: {
@@ -253,16 +253,25 @@ export default function controller() {
     filterUnAssign() {
       const filteredUnAssign: any = {}
       const filters = state.filtersUnassign;
-      const unassingn = state.allUnAssign;
+      const unassign = state.allUnAssign;
 
-      for (const key in filters) {
-        const value = filters[key]
-        if(key) {
-          for (const uKey in unassingn) {
-            const res = unassingn[uKey]
-            filteredUnAssign[uKey] = value == 'ALL' ? res : res.filter(u => u[key] == value)
-          }
-        }
+      if (!filters || !unassign) {
+        state.unAssignedData = unassign || {};
+        return;
+      }
+
+      for (const uKey in unassign) {
+        const res = unassign[uKey];
+
+        // AND FILTERS
+        const filteredRes = res.filter(item => {
+          return Object.keys(filters).every(key => {
+            const value = filters[key];
+            return value === 'ALL' || item[key] == value;
+          });
+        });
+
+        filteredUnAssign[uKey] = filteredRes;
       }
 
       state.unAssignedData = filteredUnAssign
