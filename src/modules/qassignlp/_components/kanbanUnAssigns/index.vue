@@ -16,7 +16,7 @@
             <q-inner-loading v-if="loading" showing color="primary"/>
             <!-- dynamic content  -->
             <contentType
-              class="cursor-pointer"
+              class="cursor-pointer q-pb-sm"
               :v-else="!loading"
               :col="column"
               :row="element"

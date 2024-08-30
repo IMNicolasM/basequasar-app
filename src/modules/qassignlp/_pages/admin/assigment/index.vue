@@ -1,7 +1,10 @@
 <template>
   <div id="assigns">
+    <setup-form v-model="openForm" />
+
     <page-actions
       :excludeActions="excludeActions"
+      :extra-actions="pageActions"
       :title="$tr($route.meta.title)"
       :dynamicFilter="filters"
       :dynamicFilterValues="getDynamicFilterValues"
@@ -71,12 +74,14 @@ import controller from './controller';
 import dynamicFilter from 'modules/qsite/_components/master/dynamicFilter';
 import dynamicTableClone from 'modules/qassignlp/_components/dynamicTableClone/index.vue';
 import kanban from 'modules/qassignlp/_components/kanbanUnAssigns/index.vue'
+import setupForm from 'modules/qassignlp/_components/setupForm/index.vue'
 
 export default defineComponent({
   props: {},
   components: {
     kanban,
     dynamicFilter,
+    setupForm,
     dynamicTableClone
   },
   setup() {

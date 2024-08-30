@@ -17,11 +17,14 @@ export default {
         'lateAfternoon': 'Late Afternoon',
         'evening': 'Evening',
         'brnId': 'Market',
-        'rnkId': 'Rnk Id',
-        'dspId': 'Dsp Id'
+        'rnkId': 'Grade',
+        'dspId': 'Dsp Id',
+        'milesTrip': 'Max Miles Trip',
+        'milesHome': 'Max Miles From Home',
+        'ignoreSlots': 'Ignore Slots'
       },
       'messages': {
-        'reassign': 'Reassign'
+        'reassign': 'Re-calculate Assignments'
       },
       'validation': {},
     }

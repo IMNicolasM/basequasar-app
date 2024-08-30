@@ -121,6 +121,29 @@ export default function controller() {
         }
       },
     },
+    openForm: false,
+    pageActions: [
+      {
+        label: i18n.tr('ileads.cms.messages.reassign'),
+        props: {
+          icon: 'fa-light fa-shuffle',
+          label: i18n.tr('ileads.cms.messages.reassign'),
+          round: false,
+          rounded: true,
+          padding: 'xs md',
+          color: 'green'
+        },
+        action: () => console.warn('Heyyyyyyyyyyy')
+      },
+      {
+        label: i18n.tr('isite.cms.label.setup'),
+        props: {
+          icon: 'fa-light fa-gear'
+        },
+        action: () => methods.openSetupForm()
+      },
+    ],
+
   });
 
   // Computed
@@ -190,7 +213,7 @@ export default function controller() {
           }
           const findLead = leads.find(l => l.id == lead_id);
           if (!findLead) {
-            alert.warning(`Not found lead with ID: ${lead_id}`);
+            //alert.warning(`Not found lead with ID: ${lead_id}`);
             continue;
           }
 
@@ -291,6 +314,9 @@ export default function controller() {
         slot3: { active: false, data: [] },
         slot4: { active: false, data: [] },
       }
+    },
+    openSetupForm() {
+      state.openForm = true
     }
   };
 

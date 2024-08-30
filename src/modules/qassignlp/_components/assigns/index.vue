@@ -12,7 +12,7 @@
     >
       <template #item="{ element }">
         <div class="cursor-pointer">
-          <simple-card :row="element" :col="col" />
+          <simple-card :row="element" :col="col" :block="true" />
         </div>
       </template>
     </draggable>

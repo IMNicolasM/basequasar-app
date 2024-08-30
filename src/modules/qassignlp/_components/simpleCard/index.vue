@@ -14,8 +14,16 @@
       <span v-if="row?.score">EV: {{ $trc(row.score, 'en-us')}} <br/></span>
       <span v-if="row?.crTier">CR: {{ row.crTier}}</span>
     </q-card-section>
-    <div class="tw-font-semibold tw-text-gray-600" v-if="row?.distance">({{ parseInt(row.distance) }} mi /
-      {{ getDriveTime(row.distance) }} mins)
+    <div class="flex q-px-sm justify-between items-center">
+      <div class="flex-grow text-center tw-font-semibold tw-text-gray-600" v-if="row?.distance">({{ parseInt(row.distance) }} mi /
+        {{ getDriveTime(row.distance) }} mins)
+      </div>
+       <q-icon
+         v-if="block"
+         size="12px"
+         color="amber-8"
+         :name="`fa-solid fa-lock${isBlock ? '' : '-open'}`"
+         @click="isBlock = !isBlock"/>
     </div>
   </q-card>
 </template>
@@ -26,7 +34,8 @@ import controller from './controller'
 export default defineComponent({
   props: {
     row: {default: null},
-    col: {default: null}
+    col: {default: null},
+    block: {default: false}
   },
   setup(props, {emit}) {
     return controller(props, emit)

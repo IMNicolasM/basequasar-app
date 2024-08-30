@@ -10,7 +10,6 @@ export default function controller(props, emit) {
 
   // States
   const state = reactive({
-    isBlock: false,
     COLORS: {
       Verif: 'red',
       Set: 'red'
