@@ -21,7 +21,9 @@ export default {
         'dspId': 'Dsp Id',
         'milesTrip': 'Max Miles Trip',
         'milesHome': 'Max Miles From Home',
-        'ignoreSlots': 'Ignore Slots'
+        'ignoreSlots': 'Ignore Slots',
+        'ignoreRnkId': 'Ignore Grades',
+        'daysSalesman': 'Days Of Salesman Score'
       },
       'messages': {
         'reassign': 'Re-calculate Assignments'

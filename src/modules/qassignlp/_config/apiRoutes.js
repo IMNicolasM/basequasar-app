@@ -12,4 +12,5 @@ export default {
   branches: `${urlBase}/branches`,
   followups: `${urlBase}/followups`,
   rank: `${urlBase}/rank`,
+  config: `${urlBase}/config`,
 }

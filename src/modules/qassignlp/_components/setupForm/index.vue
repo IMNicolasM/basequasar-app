@@ -2,7 +2,7 @@
   <!--Modal with form to category-->
   <div>
     <master-modal
-      id="modalSetupForm" v-model="show" v-bind="modalProps" custom-position>
+      id="modalSetupForm" v-model="show" v-bind="modalProps" custom-position @hide="resetModal">
       <div class="modal-crud">
         <div id="cardContent" class="row col-1">
           <div class="relative-position col-12">
@@ -11,6 +11,7 @@
               autocomplete="off"
               ref="formContent"
               class="row q-col-gutter-md col-12"
+              @submit="createItem"
               @validation-error="$alert.error($tr('isite.cms.message.formInvalid'))"
             >
               <!--Fields-->
@@ -22,7 +23,7 @@
                   :field="{...field, testId: (field.testId  || field.name || key)}"
                   :ref="`field-${field.name || key}`"
                 />
-            </div>
+              </div>
             </q-form>
           </div>
         </div>
@@ -34,7 +35,7 @@
 <script>
 export default {
   props: {
-    modelValue: { default: false }
+    modelValue: {default: false}
   },
   emits: ['update:modelValue'],
   components: {},
@@ -44,17 +45,20 @@ export default {
     },
     show(newValue) {
       this.$emit('update:modelValue', this.show);
+      if (newValue) this.initForm()
     }
   },
   mounted() {
-    this.$nextTick(function() {
+    this.$nextTick(function () {
       this.show = this.modelValue;
     });
   },
   data() {
     return {
       show: false,
-      formTemplate: {}
+      formTemplate: {},
+      loading: false,
+      apiRoute: 'apiRoutes.qassignlp.config'
     };
   },
   computed: {
@@ -64,6 +68,7 @@ export default {
       return {
         title: 'Setup ANR',
         width: 'max-content',
+        loading: this.loading,
         actions: [
           {
             action: () => this.show = false,
@@ -73,10 +78,10 @@ export default {
             }
           },
           {
-            action: () => this.show = false,
+            action: () => this.$refs.formContent.submit(),
             props: {
               color: 'primary',
-              label: this.$tr('isite.cms.label.save')
+              label: this.$tr('isite.cms.label.apply')
             }
           }
         ]
@@ -104,18 +109,21 @@ export default {
           },
         },
         brnId: {
-          value: 'ALL',
+          value: ['ALL'],
           type: 'select',
           colClass: 'col-12 col-md-6',
           props: {
             label: this.$tr('ileads.cms.form.brnId'),
+            useInput: true,
+            useChips: true,
+            multiple: true,
             options: [
-              { label: '-- ALL --', value: 'ALL' }
+              {label: '-- ALL --', value: 'ALL'}
             ]
           },
           loadOptions: {
             apiRoute: 'apiRoutes.qassignlp.branches',
-            select: {label: 'ShortName', id: 'ShortName'} //{label: 'LongName', id: 'ShortName'}
+            select: {label: 'label', id: 'value'}
           }
         },
         slot: {
@@ -128,35 +136,97 @@ export default {
             useChips: true,
             multiple: true,
             options: [
-              { label: 'Slot 1', value: 1 },
-              { label: 'Slot 2', value: 2 },
-              { label: 'Slot 3', value: 3 },
-              { label: 'Slot 4', value: 4 }
+              {label: 'Slot 1', value: 1},
+              {label: 'Slot 2', value: 2},
+              {label: 'Slot 3', value: 3},
+              {label: 'Slot 4', value: 4}
             ]
           }
         },
+        rnkId: {
+          value: ['5', '6', '7'],
+          type: 'select',
+          colClass: 'col-12 col-md-6',
+          props: {
+            label: this.$tr('ileads.cms.form.ignoreRnkId'),
+            useInput: true,
+            useChips: true,
+            multiple: true
+          },
+          loadOptions: {
+            apiRoute: 'apiRoutes.qassignlp.rank',
+            select: {label: 'descr', id: 'id'},
+            requestParams: {filter: {active: true}}
+          }
+        },
+        daysSalesman: {
+          value: 7,
+          type: 'input',
+          colClass: 'col-12 col-md-6',
+          props: {
+            type: 'number',
+            label: this.$tr('ileads.cms.form.daysSalesman')
+          },
+        }
       }
     }
   },
-  methods: {}
+  methods: {
+    //Init form
+    async initForm() {
+      this.loading = true;//loading
+      await this.getDataItem();//Get data item
+      this.loading = false;
+    },
+    //Get data category to update
+    getDataItem() {
+      return new Promise((resolve, reject) => {
+        let params = {//Params to request
+          refresh: true
+        };
+        this.$crud.index(this.apiRoute, params).then(response => {
+          this.formTemplate = response.data
+          resolve(true);
+        }).catch(error => {
+          this.$apiResponse.handleError(error, () => {
+            this.messageWindow('error', this.$tr('isite.cms.message.errorRequest'));
+            reject(false);
+          });
+        });
+      });
+    },
+    async createItem(data) {
+      console.warn({data})
+      if (true) {
+        this.loading = true;
+        let formData = this.$clone(this.formTemplate);
+        let requestInfo = {response: false, error: false};//Default request response
+
+        try {
+          requestInfo.response = await this.$crud.create(
+            this.apiRoute,
+            formData,
+            {}
+          );
+        } catch (err) {
+          requestInfo.error = err;
+        }
+
+        //Action after request
+        if (requestInfo.response) {
+          this.$alert.info({message: `${this.$tr('isite.cms.message.recordCreated')}`});
+        } else {
+          this.$alert.error({message: `${this.$tr('isite.cms.message.recordNoCreated')}`});
+        }
+        this.loading = false;//login hide
+        this.show = false;
+      }
+    },
+    resetModal() {
+      this.formTemplate = {};
+      this.show = false;
+      this.loading = false
+    }
+  }
 };
 </script>
-
-<!--<script lang="ts">-->
-<!--import {defineComponent} from 'vue'-->
-<!--import controller from './controller'-->
-
-<!--export default defineComponent({-->
-<!--  props: {-->
-<!--    modelValue: { default: false },-->
-<!--    itemId: { default: false },-->
-<!--    field: { default: false },-->
-<!--    params: { default: false }-->
-<!--  },-->
-<!--  setup(props, {emit}) {-->
-<!--    return controller(props, emit)-->
-<!--  }-->
-<!--})-->
-<!--</script>-->
-<!--<style lang="scss">-->
-<!--</style>-->

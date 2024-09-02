@@ -40,14 +40,15 @@ export default function controller() {
         type: 'select',
         quickFilter: true,
         props: {
+          sortOptions: false,
           label: i18n.tr('ileads.cms.form.brnId'),
           options: [
-            { label: '-- ALL --', value: 'ALL' }
+            { label: 'ALL', value: 'ALL' }
           ]
         },
         loadOptions: {
           apiRoute: 'apiRoutes.qassignlp.branches',
-          select: {label: 'ShortName', id: 'ShortName'} //{label: 'LongName', id: 'ShortName'}
+          select: {label: 'label', id: 'value'}
         }
       },
       apptdate: {
@@ -78,14 +79,15 @@ export default function controller() {
         value: 'ALL',
         type: 'select',
         props: {
+          sortOptions: false,
           label: i18n.tr('ileads.cms.form.brnId'),
           options: [
-            { label: '-- ALL --', value: 'ALL' }
+            { label: 'ALL', value: 'ALL' }
           ]
         },
         loadOptions: {
           apiRoute: 'apiRoutes.qassignlp.branches',
-          select: {label: 'ShortName', id: 'ShortName'} //{label: 'LongName', id: 'ShortName'}
+          select: {label: 'label', id: 'value'}
         }
       },
       dspId: {
@@ -205,6 +207,8 @@ export default function controller() {
           mappedData[slr_id][`slot${slot}`].data.push(leadInfo);
         }
 
+        total += idsAssigns.length || 0
+
         for (const assign of assigns) {
           let { slr_id , lead_id, slot, distance } = assign;
           slr_id = parseInt(slr_id)
@@ -289,8 +293,13 @@ export default function controller() {
         // AND FILTERS
         const filteredRes = res.filter(item => {
           return Object.keys(filters).every(key => {
-            const value = filters[key];
-            return value === 'ALL' || item[key] == value;
+            let value = filters[key];
+            if(value === 'ALL') return true
+            if(key == 'brnId') {
+              value = value.split(',')
+              return value.includes(item[key])
+            }
+            return item[key] == value;
           });
         });
 
