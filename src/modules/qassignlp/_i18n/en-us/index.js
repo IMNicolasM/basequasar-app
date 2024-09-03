@@ -26,7 +26,9 @@ export default {
         'daysSalesman': 'Days Of Salesman Score'
       },
       'messages': {
-        'reassign': 'Re-calculate Assignments'
+        'reassign': 'Re-calculate Assignments',
+        'autoAssignerUpdate': 'The auto-assigner settings have been successfully updated',
+        'autoAssignerNoUpdate': 'The auto-assigner settings could not be updated'
       },
       'validation': {},
     }

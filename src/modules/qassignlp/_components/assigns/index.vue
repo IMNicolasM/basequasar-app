@@ -1,13 +1,13 @@
 <template>
   <!--cell content-->
   <div :class="data.active === false ? 'tw-bg-gray-300 tw-py-2 tw-px-4 tw-rounded-md tw-text-center tw-font-semibold tw-text-gray-800' : ''">
-    <div v-if="data.active === false">
+    <div v-if="data.active === false" class="cursor-not-allowed">
       Not on Schedule
     </div>
     <draggable
       class="tw-flex wrap tw-items-center tw-justify-center tw-max-w-30 lg:tw-max-w-36"
       :list="data.data"
-      group="table"
+      :group="col.field || 'table'"
       item-key="slrName"
     >
       <template #item="{ element }">

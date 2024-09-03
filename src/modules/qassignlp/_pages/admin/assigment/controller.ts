@@ -14,7 +14,7 @@ export default function controller() {
 
   // States
   const state = reactive({
-    excludeActions: ['search'],
+    excludeActions: ['search', 'sync', 'export', 'recommendations'],
     loading: false,
     dynamicFilterValues: {},
     dynamicFilterSummary: {},

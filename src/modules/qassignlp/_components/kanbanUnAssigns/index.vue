@@ -5,10 +5,11 @@
         <p>{{ column.label }}</p>
       </div>
       <draggable
+        :group="column.field"
         v-bind="kanbanProps"
         :list="rows[column.field]"
         @start="dragColumn = true"
-        @end="show"
+        @end="dragColumn = false"
         :move="show"
       >
         <template #item="{ element }">

@@ -35,7 +35,8 @@
 <script>
 export default {
   props: {
-    modelValue: {default: false}
+    modelValue: {default: false},
+    saveInDb: {default: false}
   },
   emits: ['update:modelValue'],
   components: {},
@@ -185,7 +186,23 @@ export default {
           refresh: true
         };
         this.$crud.index(this.apiRoute, params).then(response => {
-          this.formTemplate = response.data
+          const res = response.data[0];
+
+          const value = res.DataValue;
+
+          let objValue = {};
+          if (typeof value == 'string') {
+            try {
+              objValue = JSON.parse(value);
+            } catch (error) {
+              console.error("Invalid JSON string:", error);
+            }
+          }
+
+          this.formTemplate = {
+            ...this.formTemplate,
+            ...objValue
+          }
           resolve(true);
         }).catch(error => {
           this.$apiResponse.handleError(error, () => {
@@ -195,18 +212,16 @@ export default {
         });
       });
     },
-    async createItem(data) {
-      console.warn({data})
-      if (true) {
+    async createItem() {
+      if (await this.$refs.formContent.validate()) {
         this.loading = true;
         let formData = this.$clone(this.formTemplate);
         let requestInfo = {response: false, error: false};//Default request response
 
         try {
-          requestInfo.response = await this.$crud.create(
+          requestInfo.response = await this.$crud.post(
             this.apiRoute,
-            formData,
-            {}
+            {attributes: formData}
           );
         } catch (err) {
           requestInfo.error = err;
@@ -214,9 +229,9 @@ export default {
 
         //Action after request
         if (requestInfo.response) {
-          this.$alert.info({message: `${this.$tr('isite.cms.message.recordCreated')}`});
+          this.$alert.info({message: `${this.$tr('ileads.cms.messages.autoAssignerUpdate')}`});
         } else {
-          this.$alert.error({message: `${this.$tr('isite.cms.message.recordNoCreated')}`});
+          this.$alert.error({message: `${this.$tr('ileads.cms.messages.autoAssignerNoUpdate')}`});
         }
         this.loading = false;//login hide
         this.show = false;

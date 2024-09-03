@@ -25,7 +25,7 @@
       @update:summary="summary => dynamicFilterSummary = summary"
     />
 
-    <section class="tw-w-full tw-flex tw-flex-wrap md:tw-flex-nowrap tw-gutter-sm md:tw-gutter-md tw-gap-4">
+    <section class="relative-position tw-w-full tw-flex tw-flex-wrap md:tw-flex-nowrap tw-gutter-sm md:tw-gutter-md tw-gap-4">
       <div class="tw-w-full md:tw-w-[50%]">
         <div class="text-primary text-weight-bold ellipsis title-content items-center tw-text-lg text-center">
           <label id="titleCrudTable">Sales Rep Availability</label>
@@ -50,7 +50,7 @@
         <div class="text-primary text-weight-bold ellipsis title-content items-center tw-text-lg text-center tw-pb-2">
           <label id="titleCrudTable">Appointments</label>
         </div>
-        <div class="row q-col-gutter-x-sm" style="display: flex; flex-wrap: wrap;">
+        <div class="row q-col-gutter-x-sm tw-px-2" style="display: flex; flex-wrap: wrap;">
           <template v-for="(field, key) in fieldsUnAssign" :key="key">
             <div class="col-12 col-md-4">
               <dynamic-field
@@ -64,6 +64,8 @@
 
         <kanban :kanban-props="{itemKey: 'id', animation: '200'}" :columns="columnsSlot" :rows="unAssignedData" @endDrag="endMove" />
       </div>
+      <!--Inner loading-->
+      <inner-loading :visible="loading"/>
     </section>
 
   </div>
