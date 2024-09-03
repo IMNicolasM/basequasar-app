@@ -9,9 +9,10 @@
       :list="data.data"
       :group="col.field || 'table'"
       item-key="slrName"
+      @change="moveDrag"
     >
       <template #item="{ element }">
-        <div class="cursor-pointer">
+        <div class="cursor-pointer q-pb-xs">
           <simple-card :row="element" :col="col" :block="true" />
         </div>
       </template>

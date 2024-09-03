@@ -8,13 +8,10 @@
         :group="column.field"
         v-bind="kanbanProps"
         :list="rows[column.field]"
-        @start="dragColumn = true"
-        @end="dragColumn = false"
-        :move="show"
+        @change="moveDrag"
       >
         <template #item="{ element }">
           <div>
-            <q-inner-loading v-if="loading" showing color="primary"/>
             <!-- dynamic content  -->
             <contentType
               class="cursor-pointer q-pb-sm"
@@ -46,7 +43,7 @@ export default defineComponent({
     draggable,
     contentType
   },
-  //emits: ['startDrag', 'endDrag', 'changeDrag'],
+  emits: ['changeDrag'],
   setup(props, {emit}) {
     return controller(props, emit)
   },

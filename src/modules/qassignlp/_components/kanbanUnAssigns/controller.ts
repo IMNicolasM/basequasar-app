@@ -1,5 +1,6 @@
 import {computed, reactive, ref, onMounted, toRefs, watch, getCurrentInstance, markRaw} from "vue";
 import { i18n, clone } from 'src/plugins/utils'
+import service from "../assigns/services";
 
 
 export default function controller(props, emit) {
@@ -32,18 +33,16 @@ export default function controller(props, emit) {
 
   // Methods
   const methods = {
-    // methodKey: () => {}
-    countPage(pagination){
-      const page = pagination.pagination.page;
-      const rowsPerPage = pagination.pagination.rowsPerPage;
-      const showTable = props.initialPagination.rowsNumber;
-      const totalPage = props.initialPagination.rowsNumber;
-      const start = page == 1 ? 1 : page * rowsPerPage - ((rowsPerPage - (page - 1)) <= 0 ? 1 : rowsPerPage - (page - 1));
-      const end = showTable < rowsPerPage ? totalPage : page * rowsPerPage;
-      return `${start} - ${end} ${i18n.tr('isite.cms.label.of')} ${totalPage}`
-    },
-    show(e) {
-      console.warn("HEYYYYYOOOO", e)
+    async moveDrag(evt) {
+      const  {added} = evt;
+
+      const leadId = added?.element.id;
+      const slot = added?.element.slot;
+      const index = added?.newIndex;
+
+      if(leadId && index >= 0) {
+        props.rows[`slot${slot}`][index].distance = null
+      }
     }
   }
 
