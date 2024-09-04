@@ -43,7 +43,7 @@ export default function controller() {
           sortOptions: false,
           label: i18n.tr('ileads.cms.form.brnId'),
           options: [
-            { label: 'ALL', value: 'ALL' }
+            {label: 'ALL', value: 'ALL'}
           ]
         },
         loadOptions: {
@@ -66,13 +66,48 @@ export default function controller() {
     unAssignedData: {},
     allUnAssign: {},
     columnsSlot: [
-      {name: 'slot1', label: i18n.tr('ileads.cms.form.morning'), field: 'slot1', align: 'center', borderColor: '#36d7b7', component: simpleCard},
-      {name: 'slot2', label: i18n.tr('ileads.cms.form.afternoon'), field: 'slot2', align: 'center', component: simpleCard, borderColor: '#e08283'},
-      {name: 'slot3', label: i18n.tr('ileads.cms.form.lateAfternoon'), field: 'slot3', align: 'center', component: simpleCard, borderColor: '#7bbcf5'},
-      {name: 'slot4', label: i18n.tr('ileads.cms.form.evening'), field: 'slot4', align: 'center', component: simpleCard, borderColor: '#a0a0ef'},
+      {
+        name: 'slot1',
+        label: i18n.tr('ileads.cms.form.morning'),
+        field: 'slot1',
+        align: 'center',
+        borderColor: '#36d7b7',
+        component: simpleCard
+      },
+      {
+        name: 'slot2',
+        label: i18n.tr('ileads.cms.form.afternoon'),
+        field: 'slot2',
+        align: 'center',
+        component: simpleCard,
+        borderColor: '#e08283'
+      },
+      {
+        name: 'slot3',
+        label: i18n.tr('ileads.cms.form.lateAfternoon'),
+        field: 'slot3',
+        align: 'center',
+        component: simpleCard,
+        borderColor: '#7bbcf5'
+      },
+      {
+        name: 'slot4',
+        label: i18n.tr('ileads.cms.form.evening'),
+        field: 'slot4',
+        align: 'center',
+        component: simpleCard,
+        borderColor: '#a0a0ef'
+      },
     ],
     columns: [
-      {name: 'brnId', label: i18n.tr('ileads.cms.form.slrName'), field: 'brnId', align: 'rigth', component: getName, class:'dense-column'}
+      {
+        name: 'brnId',
+        label: i18n.tr('ileads.cms.form.slrName'),
+        field: 'brnId',
+        align: 'rigth',
+        component: getName,
+        class: 'dense-column'
+      }
     ],
     fieldsUnAssign: {
       brnId: {
@@ -82,7 +117,7 @@ export default function controller() {
           sortOptions: false,
           label: i18n.tr('ileads.cms.form.brnId'),
           options: [
-            { label: 'ALL', value: 'ALL' }
+            {label: 'ALL', value: 'ALL'}
           ]
         },
         loadOptions: {
@@ -96,14 +131,14 @@ export default function controller() {
         props: {
           label: i18n.tr('ileads.cms.form.dspId'),
           options: [
-            { label: '-- ALL --', value: 'ALL' },
-            { label: 'Set', value: 'Set' },
-            { label: 'Verif', value: 'Verif' },
-            { label: 'Cnf', value: 'Cnf' },
-            { label: 'NoVerif', value: 'NoVerif' },
-            { label: 'NoCnf', value: 'NoCnf' },
-            { label: 'UnCon', value: 'UnCon' },
-            { label: 'Issue', value: 'Issue' }
+            {label: '-- ALL --', value: 'ALL'},
+            {label: 'Set', value: 'Set'},
+            {label: 'Verif', value: 'Verif'},
+            {label: 'Cnf', value: 'Cnf'},
+            {label: 'NoVerif', value: 'NoVerif'},
+            {label: 'NoCnf', value: 'NoCnf'},
+            {label: 'UnCon', value: 'UnCon'},
+            {label: 'Issue', value: 'Issue'}
           ]
         }
       },
@@ -113,7 +148,7 @@ export default function controller() {
         props: {
           label: i18n.tr('ileads.cms.form.rnkId'),
           options: [
-            { label: '-- ALL --', value: 'ALL' }
+            {label: '-- ALL --', value: 'ALL'}
           ]
         },
         loadOptions: {
@@ -157,9 +192,6 @@ export default function controller() {
 
   // Methods
   const methods = {
-    endMove(e) {
-      console.warn(e)
-    },
     toggleDynamicFilterModal() {
       state.showDynamicFilterModal = !state.showDynamicFilterModal;
     },
@@ -210,7 +242,7 @@ export default function controller() {
         total += idsAssigns.length || 0
 
         for (const assign of assigns) {
-          let { slr_id , lead_id, slot, distance } = assign;
+          let {slr_id, lead_id, slot, distance} = assign;
           slr_id = parseInt(slr_id)
           if (!mappedData[slr_id]) {
             mappedData[slr_id] = methods.initializeMappedData(slr_id);
@@ -233,9 +265,9 @@ export default function controller() {
         }
 
         for (const emp of emps) {
-          const { id, FirstName, LastName, brn_id, tms_id } = emp;
+          const {id, FirstName, LastName, brn_id, tms_id} = emp;
           if (filterBrn !== 'ALL' && (filterBrn !== brn_id && !mappedData[id])) continue;
-          if(!mappedData[id] && tms_id == null) continue
+          if (!mappedData[id] && tms_id == null) continue
 
           if (!mappedData[id]) {
             mappedData[id] = methods.initializeMappedData(id, `${LastName}, ${FirstName}`, brn_id);
@@ -244,7 +276,7 @@ export default function controller() {
           mappedData[id].slrName = `${LastName}, ${FirstName}`;
           mappedData[id].brnId = brn_id;
 
-          if(tms_id == null) continue
+          if (tms_id == null) continue
           mappedData[id][`slot${tms_id}`].active = true;
         }
 
@@ -256,7 +288,7 @@ export default function controller() {
 
       const valuesMap: any = Object.values(mappedData || {})
 
-      const assignedData = valuesMap.sort((a,b) => a.brnId.localeCompare(b.brnId))
+      const assignedData = valuesMap.sort((a, b) => a.brnId.localeCompare(b.brnId))
       state.assignedData = assignedData
       const unAssigns = leads.filter(l => !idsAssigns.includes(l.id));
 
@@ -266,7 +298,7 @@ export default function controller() {
         let nameSlot = `slot${u.slot}`
         const camelCaseResponse = helper.snakeToCamelCaseKeys(u)
 
-        if(!mappedUnAssigns[nameSlot]) mappedUnAssigns[nameSlot] = []
+        if (!mappedUnAssigns[nameSlot]) mappedUnAssigns[nameSlot] = []
 
         mappedUnAssigns[nameSlot].push(camelCaseResponse)
       })
@@ -294,8 +326,8 @@ export default function controller() {
         const filteredRes = res.filter(item => {
           return Object.keys(filters).every(key => {
             let value = filters[key];
-            if(value === 'ALL') return true
-            if(key == 'brnId') {
+            if (value === 'ALL') return true
+            if (key == 'brnId') {
               value = value.split(',')
               return value.includes(item[key])
             }
@@ -318,14 +350,38 @@ export default function controller() {
     },
     initializeSlots() {
       return {
-        slot1: { active: false, data: [] },
-        slot2: { active: false, data: [] },
-        slot3: { active: false, data: [] },
-        slot4: { active: false, data: [] },
+        slot1: {active: false, data: []},
+        slot2: {active: false, data: []},
+        slot3: {active: false, data: []},
+        slot4: {active: false, data: []},
       }
     },
     openSetupForm() {
       state.openForm = true
+    },
+    async moveDrag({evt, row}) {
+      const  {added} = evt;
+
+      const leadId = added?.element.id;
+      const slot = added?.element.slot;
+      const index = added?.newIndex;
+
+      if(leadId && index >= 0) {
+        const body = {
+          leadId,
+          slrId: row.slrId,
+          slot,
+          rowInfo: row
+        }
+
+        const leadIndex = state.assignedData.findIndex(l => l.slrId == row.slrId)
+
+        await service.calculateAndUpdate(body).then(r => {
+          if(r.distance) {
+            state.assignedData[leadIndex][`slot${slot}`][index].distance = r.distance
+          }
+        }).catch(e => alert.error(`The distance could not be calculated, lead ID: ${leadId}`))
+      }
     }
   };
 
@@ -339,7 +395,16 @@ export default function controller() {
     for (const slotColumn of state.columnsSlot) {
       const column: any = clone(slotColumn)
 
-      slotColumns.push({...column, component: assign})
+      slotColumns.push({
+        ...column,
+        component: {
+          template: assign,
+          props: {block: true, calcDistance: true},
+          events: {
+            change: (e) => methods.moveDrag(e)
+          }
+        }
+      })
     }
 
     state.columns = [

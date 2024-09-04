@@ -4,6 +4,8 @@
     <component
       v-if="component"
       v-show="!isLoading"
+      v-bind="componentProps?.props"
+      v-on="componentProps?.events || {}"
       :is="component"
       :col="col"
       :row="row"

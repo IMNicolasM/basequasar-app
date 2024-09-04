@@ -10,7 +10,8 @@ export default function controller(props, emit) {
   // States
   const state = reactive({
     // Key: Default Value
-    component: shallowRef()
+    component: shallowRef(),
+    componentProps: null
   })
 
   // Computed
@@ -31,7 +32,12 @@ export default function controller(props, emit) {
     },
     loadComponent(){
       if(computeds.isComponent.value){
-        state.component = markRaw(props.col.component)
+        let path = props.col.component;
+        if(path?.template) {
+          state.componentProps = {...props.col.component, template: null}
+          path = path?.template;
+        }
+        state.component = markRaw(path)
       }
     },
     getDriveTime(dist: string) {

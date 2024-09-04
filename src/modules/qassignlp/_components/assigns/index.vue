@@ -8,12 +8,13 @@
       class="tw-flex wrap tw-items-center tw-justify-center tw-max-w-30 lg:tw-max-w-36"
       :list="data.data"
       :group="col.field || 'table'"
-      item-key="slrName"
+      item-key="id"
+      v-bind="$attrs"
       @change="moveDrag"
     >
       <template #item="{ element }">
         <div class="cursor-pointer q-pb-xs">
-          <simple-card :row="element" :col="col" :block="true" />
+          <simple-card :row="element" :col="col" :block="block" />
         </div>
       </template>
     </draggable>
@@ -30,10 +31,11 @@ export default defineComponent({
   props: {
     row: {default: null},
     col: {default: null},
-    data: {default: null}
+    data: {default: null},
+    block: {default: false}
   },
-  setup(props, {emit}) {
-    return controller(props, emit)
+  setup(props, {emit, attrs}) {
+    return { ...controller(props, emit), attrs };
   }
 })
 </script>

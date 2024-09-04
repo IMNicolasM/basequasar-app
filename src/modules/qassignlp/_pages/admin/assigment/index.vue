@@ -62,7 +62,7 @@
           </template>
         </div>
 
-        <kanban :kanban-props="{itemKey: 'id', animation: '200'}" :columns="columnsSlot" :rows="unAssignedData" @endDrag="endMove" />
+        <kanban :kanban-props="{itemKey: 'id', animation: '200'}" :columns="columnsSlot" :rows="unAssignedData" />
       </div>
       <!--Inner loading-->
       <inner-loading :visible="loading"/>
