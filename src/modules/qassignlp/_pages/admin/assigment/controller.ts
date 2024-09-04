@@ -22,19 +22,6 @@ export default function controller() {
     totalAssigns: 0,
     totalMiles: 0,
     filters: {
-      slr_id: {
-        value: null,
-        type: 'select',
-        props: {
-          label: i18n.tr('ileads.cms.form.slrName'),
-          clearable: true
-        },
-        loadOptions: {
-          apiRoute: 'apiRoutes.qassignlp.employees',
-          select: {label: item => `${item.LastName}, ${item.FirstName}`, id: 'id'},
-          requestParams: {filter: {active: 1, salesrep: 1}}
-        }
-      },
       brn_id: {
         value: 'ALL',
         type: 'select',
@@ -63,6 +50,8 @@ export default function controller() {
     },
     filtersUnassign: {},
     assignedData: [],
+    employees: [],
+    unMappedAssignedData: [],
     unAssignedData: {},
     allUnAssign: {},
     columnsSlot: [
@@ -131,15 +120,13 @@ export default function controller() {
         props: {
           label: i18n.tr('ileads.cms.form.dspId'),
           options: [
-            {label: '-- ALL --', value: 'ALL'},
-            {label: 'Set', value: 'Set'},
-            {label: 'Verif', value: 'Verif'},
-            {label: 'Cnf', value: 'Cnf'},
-            {label: 'NoVerif', value: 'NoVerif'},
-            {label: 'NoCnf', value: 'NoCnf'},
-            {label: 'UnCon', value: 'UnCon'},
-            {label: 'Issue', value: 'Issue'}
+            {label: '-- ALL --', value: 'ALL'}
           ]
+        },
+        loadOptions: {
+          apiRoute: 'apiRoutes.qassignlp.disposition',
+          select: {label: 'descr', id: 'descr'},
+          requestParams: {filter: {active: 1}}
         }
       },
       rnkId: {
@@ -162,6 +149,7 @@ export default function controller() {
     pageActions: [
       {
         label: i18n.tr('ileads.cms.messages.reassign'),
+        vIf: false,
         props: {
           icon: 'fa-light fa-shuffle',
           label: i18n.tr('ileads.cms.messages.reassign'),
@@ -207,91 +195,47 @@ export default function controller() {
         take: 1000
       }
 
-      const filterBrn = otherFilters.brn_id
-
-      let total = 0
-      let totalMiles = 0
       let leads = [];
-      const idsAssigns = [];
-      let mappedData = {}
+      let idsAssigns = [];
 
       await Promise.all([
         service.getData('apiRoutes.qassignlp.employees', refresh, params),
         service.getData('apiRoutes.qassignlp.leads', refresh, params),
         service.getData('apiRoutes.qassignlp.assignments', refresh, params)
-      ]).then(([employees, leadsResponse, assignments]) => {
-        const emps = employees.data
+      ]).then(async ([employees, leadsResponse, assignments]) => {
+        state.employees = employees.data
         leads = leadsResponse.data
         const assigns = assignments.data
 
-        const followups = leads.filter(l => l.is_follow_up)
+        let followups = leads.filter(l => l.is_follow_up)
+        const assigneds = assigns.map(a => {
+          const findLead = leads.find(l => l.id == a.lead_id)
 
-        for (const follow of followups) {
-          const {slr_id, id, slot} = follow
-          if (!mappedData[slr_id]) {
-            mappedData[slr_id] = methods.initializeMappedData(slr_id);
-          }
-          idsAssigns.push(parseInt(id));
+          return {...(findLead || {}), slr_id: a.slr_id, distance: a.distance || 0}
+        }).filter(l => l.id)
 
-          const leadInfo = {
-            ...helper.snakeToCamelCaseKeys(follow)
-          }
-          mappedData[slr_id][`slot${slot}`].data.push(leadInfo);
+        if(followups.length) {
+          await service.bulkCalculateDist({followups, assigneds}).then((res) => {
+            const data = res.data
+
+            followups = followups.map(follow => {
+              const findFollow = data.find(f => f.id == follow.id)
+              return {...follow, distance: findFollow?.distance || 0}
+            })
+          })
         }
 
-        total += idsAssigns.length || 0
+        const allAssigns = [...assigneds, ...followups]
+        idsAssigns = allAssigns.map(l => l.id)
 
-        for (const assign of assigns) {
-          let {slr_id, lead_id, slot, distance} = assign;
-          slr_id = parseInt(slr_id)
-          if (!mappedData[slr_id]) {
-            mappedData[slr_id] = methods.initializeMappedData(slr_id);
-          }
-          const findLead = leads.find(l => l.id == lead_id);
-          if (!findLead) {
-            //alert.warning(`Not found lead with ID: ${lead_id}`);
-            continue;
-          }
+        state.unMappedAssignedData = allAssigns;
 
-          totalMiles += parseInt(distance || 0);
-          idsAssigns.push(parseInt(lead_id));
-
-          const leadInfo = {
-            ...helper.snakeToCamelCaseKeys(findLead),
-            slrId: slr_id,
-            distance: distance || 0
-          }
-          mappedData[slr_id][`slot${slot}`].data.push(leadInfo);
-        }
-
-        for (const emp of emps) {
-          const {id, FirstName, LastName, brn_id, tms_id} = emp;
-          if (filterBrn !== 'ALL' && (filterBrn !== brn_id && !mappedData[id])) continue;
-          if (!mappedData[id] && tms_id == null) continue
-
-          if (!mappedData[id]) {
-            mappedData[id] = methods.initializeMappedData(id, `${LastName}, ${FirstName}`, brn_id);
-          }
-
-          mappedData[id].slrName = `${LastName}, ${FirstName}`;
-          mappedData[id].brnId = brn_id;
-
-          if (tms_id == null) continue
-          mappedData[id][`slot${tms_id}`].active = true;
-        }
-
-        total += assignments?.meta?.page?.total || 0
+        methods.mappedAssigns(allAssigns, otherFilters)
       }).catch(e => {
         alert.error(i18n.tr('isite.cms.message.errorRequest'))
         console.error(e)
       })
-
-      const valuesMap: any = Object.values(mappedData || {})
-
-      const assignedData = valuesMap.sort((a, b) => a.brnId.localeCompare(b.brnId))
-      state.assignedData = assignedData
       const unAssigns = leads.filter(l => !idsAssigns.includes(l.id));
-
       let mappedUnAssigns = {}
 
       unAssigns.forEach(u => {
@@ -304,9 +248,6 @@ export default function controller() {
       })
 
       state.allUnAssign = mappedUnAssigns
-      state.totalMiles = totalMiles
-      state.totalAssigns = total
-
       state.loading = false
     },
     filterUnAssign() {
@@ -359,12 +300,27 @@ export default function controller() {
     openSetupForm() {
       state.openForm = true
     },
-    async moveDrag({evt, row}) {
+    async moveDrag({evt, row, kanban}) {
+      if(!evt) return
       const  {added} = evt;
 
       const leadId = added?.element.id;
       const slot = added?.element.slot;
       const index = added?.newIndex;
+      const element = added?.element
+
+      if (kanban == 'unassign') {
+        if(leadId && index >= 0) {
+          state.unAssignedData[`slot${slot}`][index] = {
+            ...element,
+            distance: null,
+            slrId: null
+          };
+
+          state.unMappedAssignedData = state.unMappedAssignedData.filter(l => l.id !== leadId)
+        }
+        return
+      }
 
       if(leadId && index >= 0) {
         const body = {
@@ -378,39 +334,82 @@ export default function controller() {
 
         await service.calculateAndUpdate(body).then(r => {
           if(r.distance) {
-            state.assignedData[leadIndex][`slot${slot}`][index].distance = r.distance
+            state.assignedData[leadIndex][`slot${slot}`].data[index].distance = r.distance
+            state.unMappedAssignedData = [
+              ...state.unMappedAssignedData,
+              { ...element, slrId: row.slrId, distance: r.distance }
+            ];
           }
-        }).catch(e => alert.error(`The distance could not be calculated, lead ID: ${leadId}`))
+        }).catch(e => {
+          console.error(e)
+          alert.error('The distance could not be calculated')
+        })
       }
-    }
+    },
+    mappedAssigns(assigns = [], otherFilters) {
+      const {brn_id: filterBrn, slr_id: salesId} = otherFilters
+      let mappedData: any = {}
+      const emps = state.employees;
+
+
+      for (const assign of assigns) {
+        let {slr_id, slot} = assign;
+        if(!!salesId && salesId !== slr_id) continue
+        slr_id = parseInt(slr_id)
+        if (!mappedData[slr_id]) {
+          mappedData[slr_id] = methods.initializeMappedData(slr_id);
+        }
+        mappedData[slr_id][`slot${slot}`].data.push(helper.snakeToCamelCaseKeys(assign));
+      }
+
+      for (const emp of emps) {
+        const {id, FirstName, LastName, brn_id, tms_id} = emp;
+        if (filterBrn !== 'ALL' && (filterBrn !== brn_id && !mappedData[id])) continue;
+        if (!mappedData[id] && tms_id == null) continue
+
+        if (!mappedData[id]) {
+          mappedData[id] = methods.initializeMappedData(id, `${LastName}, ${FirstName}`, brn_id);
+        }
+
+        mappedData[id].slrName = `${LastName}, ${FirstName}`;
+        mappedData[id].brnId = brn_id;
+
+        if (tms_id == null) continue
+        mappedData[id][`slot${tms_id}`].active = true;
+      }
+
+      const valuesMap: any = Object.values(mappedData || {})
+
+      const assignedData = valuesMap.sort((a, b) => a.brnId.localeCompare(b.brnId))
+      state.assignedData = assignedData
+    },
   };
 
   watch(() => state.allUnAssign, (newValue) => {
     methods.filterUnAssign()
   })
+  watch(() => state.unMappedAssignedData, (newValue) => {
+    state.totalAssigns = newValue.length
+    state.totalMiles = newValue.reduce((prev, curr) => prev + parseInt(curr.distance || 0), 0)
+  }, {deep: true})
 
   onMounted(() => {
-    const slotColumns = []
-
-    for (const slotColumn of state.columnsSlot) {
-      const column: any = clone(slotColumn)
-
-      slotColumns.push({
-        ...column,
-        component: {
-          template: assign,
-          props: {block: true, calcDistance: true},
-          events: {
-            change: (e) => methods.moveDrag(e)
-          }
+    const slotColumns: any = clone(state.columnsSlot).map(s => ({
+      ...s,
+      component: {
+        template: assign,
+        props: {block: true, calcDistance: true},
+        events: {
+          change: (e) => methods.moveDrag(e)
         }
-      })
-    }
+      }
+    }));
 
     state.columns = [
       ...state.columns,
       ...slotColumns
     ]
+    console.warn()
   })
 
   return {...refs, ...(toRefs(state)), ...computeds, ...methods};

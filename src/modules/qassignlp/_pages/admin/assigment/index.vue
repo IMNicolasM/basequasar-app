@@ -37,7 +37,7 @@
           </div>
           <div class="tw-text-sm tw-ml-8 tw-font-semibold">
             Miles Driven:
-            <span class="text-primary">{{ totalMiles }}</span>
+            <span class="text-primary">{{ this.$trn(totalMiles) }}</span>
           </div>
         </div>
         <dynamic-table-clone
@@ -62,7 +62,7 @@
           </template>
         </div>
 
-        <kanban :kanban-props="{itemKey: 'id', animation: '200'}" :columns="columnsSlot" :rows="unAssignedData" />
+        <kanban :kanban-props="{itemKey: 'id', animation: '200'}" :columns="columnsSlot" :rows="unAssignedData" @change="moveDrag" />
       </div>
       <!--Inner loading-->
       <inner-loading :visible="loading"/>

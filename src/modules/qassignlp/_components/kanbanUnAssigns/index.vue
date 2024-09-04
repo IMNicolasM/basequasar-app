@@ -8,7 +8,7 @@
         :group="column.field"
         v-bind="kanbanProps"
         :list="rows[column.field]"
-        @change="moveDrag"
+        @change="(evt) => $emit('change', {evt, kanban: 'unassign',column, row: rows[column.field]})"
       >
         <template #item="{ element }">
           <div>
@@ -43,20 +43,10 @@ export default defineComponent({
     draggable,
     contentType
   },
-  emits: ['changeDrag'],
+  emits: ['change'],
   setup(props, {emit}) {
     return controller(props, emit)
-  },
-  computed: {
-    windowSize() {
-      return window.innerWidth >= '500' ? 'desktop' : 'mobile'
-    },
-  },
-  methods: {
-    showPagination(props) {
-      return this.windowSize == 'desktop' && props.pagesNumber > 1
-    }
-  },
+  }
 })
 </script>
 <style lang="scss">

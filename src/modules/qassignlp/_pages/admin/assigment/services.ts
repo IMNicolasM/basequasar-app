@@ -17,5 +17,15 @@ export default {
         resolve(response)
       }).catch(error => reject(error))
     })
+  },
+  bulkCalculateDist(body = {}): Promise<any> {
+    return new Promise((resolve, reject) => {
+      //Request
+      // @ts-ignore
+      baseService.post(`${config('apiRoutes.qassignlp.calc')}/bulk`, body).then(response => {
+        resolve(response)
+      }).catch(error => reject(error))
+    })
   }
+
 }

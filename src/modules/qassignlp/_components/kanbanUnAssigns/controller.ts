@@ -7,44 +7,18 @@ export default function controller(props, emit) {
   const proxy = getCurrentInstance()!.appContext.config.globalProperties
 
   // Refs
-  const refs = {
-    // refKey: ref(defaultValue)
-    pagination: ref({
-      page: 1,
-      //rowsNumber: props.initialPagination.rowsNumber,
-      rowsPerPage: 10,
-      descending: true,
-      //sortBy: 'desc',
-    }),
-  }
+  const refs = { }
 
 
   // States
-  const state = reactive({
-    // Key: Default Value
-    dragColumn: false
-  })
+  const state = reactive({})
 
   // Computed
-  const computeds = {
-    rowsPerPageOption: computed(() => [5, 10, 20, 50, 100, 300, 500])
-  }
+  const computeds = {}
 
 
   // Methods
-  const methods = {
-    async moveDrag(evt) {
-      const  {added} = evt;
-
-      const leadId = added?.element.id;
-      const slot = added?.element.slot;
-      const index = added?.newIndex;
-
-      if(leadId && index >= 0) {
-        props.rows[`slot${slot}`][index].distance = null
-      }
-    }
-  }
+  const methods = {}
 
   // Mounted
   onMounted(() => {

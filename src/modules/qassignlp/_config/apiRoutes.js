@@ -14,4 +14,5 @@ export default {
   rank: `${urlBase}/rank`,
   config: `${urlBase}/config`,
   calc: `${urlBase}/calc`,
+  disposition: `${urlBase}/disposition`,
 }
