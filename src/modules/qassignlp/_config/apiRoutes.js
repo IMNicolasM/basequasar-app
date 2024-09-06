@@ -15,4 +15,5 @@ export default {
   config: `${urlBase}/config`,
   calc: `${urlBase}/calc`,
   disposition: `${urlBase}/disposition`,
+  progress: `${urlBase}/progress`,
 }

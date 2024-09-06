@@ -16,6 +16,7 @@ export default function controller() {
   const state = reactive({
     excludeActions: ['search', 'sync', 'export', 'recommendations'],
     loading: false,
+    isRuningReCalc: false,
     dynamicFilterValues: {},
     dynamicFilterSummary: {},
     showDynamicFilterModal: false,
@@ -155,9 +156,14 @@ export default function controller() {
       return state.dynamicFilterValues;
     }),
     pageActions: computed(() => {
+      const date = state.dynamicFilterValues.apptdate;
+      const tomorrow = moment().add(1, 'days').startOf('day');
+      const apptDate = moment(date);
+
       return [
         {
           label: i18n.tr('ileads.cms.messages.reassign'),
+          vIf: apptDate.isSameOrAfter(tomorrow) && !state.isRuningReCalc,
           props: {
             icon: 'fa-light fa-shuffle',
             label: i18n.tr('ileads.cms.messages.reassign'),
@@ -166,7 +172,7 @@ export default function controller() {
             padding: 'xs md',
             color: 'green'
           },
-          action: () => console.warn('Heyyyyyyyyyyy')
+          action: () => methods.reCalc(date)
         },
         {
           label: i18n.tr('isite.cms.label.setup'),
@@ -199,6 +205,28 @@ export default function controller() {
       let leads = [];
       let idsAssigns = [];
 
+      let recalcLoading = false
+
+
+      await service.getData('apiRoutes.qassignlp.progress', refresh, {apptdate: params.filter.apptdate})
+        .then(res => {
+          if(res.data.is_runing == true)  recalcLoading = true
+          else state.isRuningReCalc = false
+        })
+        .catch(e => {
+          recalcLoading = true
+          alert.error(e.response.data.message || "The AutoAssigner is running now")
+        })
+
+      if (recalcLoading) {
+        state.isRuningReCalc = true
+        alert.error("The AutoAssigner is running yet. Please Refresh before some time")
+        state.unMappedAssignedData = []
+        state.employees = []
+        state.allUnAssign = {}
+        return
+      }
+
       await Promise.all([
         service.getData('apiRoutes.qassignlp.employees', refresh, params),
         service.getData('apiRoutes.qassignlp.leads', refresh, params),
@@ -209,13 +237,16 @@ export default function controller() {
         const assigns = assignments.data
 
         let followups = leads.filter(l => l.is_follow_up)
-        const assigneds = assigns.map(a => {
+        const mappedAssigneds = assigns.map(a => {
           const findLead = leads.find(l => l.id == a.lead_id)
+          const slr_id = a.priority_score >= 0 ? a.slr_id : findLead?.slr_id
 
-          return {...(findLead || {}), slr_id: a.slr_id, distance: a.distance || 0}
-        }).filter(l => l.id)
+          return {...(findLead || {}), slr_id, distance: a.distance || 0, priority_score: a.priority_score}
+        });
 
-        if(followups.length) {
+        const assigneds = mappedAssigneds.filter(l => l.id && l.slr_id > 0)
+
+        if (followups.length) {
           await service.bulkCalculateDist({followups, assigneds}).then((res) => {
             const data = res.data
 
@@ -302,8 +333,8 @@ export default function controller() {
       state.openForm = true
     },
     async moveDrag({evt, row, kanban}) {
-      if(!evt) return
-      const  {added} = evt;
+      if (!evt) return
+      const {added} = evt;
 
       const leadId = added?.element.id;
       const slot = added?.element.slot;
@@ -311,7 +342,7 @@ export default function controller() {
       const element = added?.element
 
       if (kanban == 'unassign') {
-        if(leadId && index >= 0) {
+        if (leadId && index >= 0) {
           state.unAssignedData[`slot${slot}`][index] = {
             ...element,
             distance: null,
@@ -323,7 +354,7 @@ export default function controller() {
         return
       }
 
-      if(leadId && index >= 0) {
+      if (leadId && index >= 0) {
         const body = {
           leadId,
           slrId: row.slrId,
@@ -334,11 +365,11 @@ export default function controller() {
         const leadIndex = state.assignedData.findIndex(l => l.slrId == row.slrId)
 
         await service.calculateAndUpdate(body).then(r => {
-          if(r.distance) {
+          if (r.distance) {
             state.assignedData[leadIndex][`slot${slot}`].data[index].distance = r.distance
             state.unMappedAssignedData = [
               ...state.unMappedAssignedData,
-              { ...element, slrId: row.slrId, distance: r.distance }
+              {...element, slrId: row.slrId, distance: r.distance}
             ];
           }
         }).catch(e => {
@@ -355,7 +386,7 @@ export default function controller() {
 
       for (const assign of assigns) {
         let {slr_id, slot} = assign;
-        if(!!salesId && salesId !== slr_id) continue
+        if (!!salesId && salesId !== slr_id) continue
         slr_id = parseInt(slr_id)
         if (!mappedData[slr_id]) {
           mappedData[slr_id] = methods.initializeMappedData(slr_id);
@@ -384,6 +415,19 @@ export default function controller() {
       const assignedData = valuesMap.sort((a, b) => a.brnId.localeCompare(b.brnId))
       state.assignedData = assignedData
     },
+    async reCalc(apptdate) {
+      state.loading = true
+
+      await service.recalculateLeads({apptdate})
+        .then(res => {
+          state.isRuningReCalc = true
+          alert.info('Start the Recalculate of Auto Assigner')
+        })
+        .catch(e => {
+          state.loading = false
+          console.error(e)
+        })
+    }
   };
 
   watch(() => state.allUnAssign, (newValue) => {

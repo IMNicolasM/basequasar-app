@@ -18,6 +18,14 @@ export default {
       }).catch(error => reject(error))
     })
   },
+  recalculateLeads(body = {}): Promise<any> {
+    return new Promise((resolve, reject) => {
+      //Request
+      baseService.post('apiRoutes.qassignlp.progress', body).then(response => {
+        resolve(response)
+      }).catch(error => reject(error))
+    })
+  },
   bulkCalculateDist(body = {}): Promise<any> {
     return new Promise((resolve, reject) => {
       //Request
