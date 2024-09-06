@@ -145,29 +145,7 @@ export default function controller() {
         }
       },
     },
-    openForm: false,
-    pageActions: [
-      {
-        label: i18n.tr('ileads.cms.messages.reassign'),
-        vIf: false,
-        props: {
-          icon: 'fa-light fa-shuffle',
-          label: i18n.tr('ileads.cms.messages.reassign'),
-          round: false,
-          rounded: true,
-          padding: 'xs md',
-          color: 'green'
-        },
-        action: () => console.warn('Heyyyyyyyyyyy')
-      },
-      {
-        label: i18n.tr('isite.cms.label.setup'),
-        props: {
-          icon: 'fa-light fa-gear'
-        },
-        action: () => methods.openSetupForm()
-      },
-    ],
+    openForm: false
 
   });
 
@@ -175,7 +153,30 @@ export default function controller() {
   const computeds = {
     getDynamicFilterValues: computed(() => {
       return state.dynamicFilterValues;
-    })
+    }),
+    pageActions: computed(() => {
+      return [
+        {
+          label: i18n.tr('ileads.cms.messages.reassign'),
+          props: {
+            icon: 'fa-light fa-shuffle',
+            label: i18n.tr('ileads.cms.messages.reassign'),
+            round: false,
+            rounded: true,
+            padding: 'xs md',
+            color: 'green'
+          },
+          action: () => console.warn('Heyyyyyyyyyyy')
+        },
+        {
+          label: i18n.tr('isite.cms.label.setup'),
+          props: {
+            icon: 'fa-light fa-gear'
+          },
+          action: () => methods.openSetupForm()
+        },
+      ];
+    }),
   };
 
   // Methods
