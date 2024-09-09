@@ -61,7 +61,7 @@ export default function controller() {
         label: i18n.tr('ileads.cms.form.morning'),
         field: 'slot1',
         align: 'center',
-        borderColor: '#36d7b7',
+        borderColor: '#4ADE80',
         component: simpleCard
       },
       {
@@ -70,7 +70,7 @@ export default function controller() {
         field: 'slot2',
         align: 'center',
         component: simpleCard,
-        borderColor: '#e08283'
+        borderColor: '#F372B5'
       },
       {
         name: 'slot3',
@@ -78,7 +78,7 @@ export default function controller() {
         field: 'slot3',
         align: 'center',
         component: simpleCard,
-        borderColor: '#7bbcf5'
+        borderColor: '#60A5FA'
       },
       {
         name: 'slot4',
@@ -86,7 +86,7 @@ export default function controller() {
         field: 'slot4',
         align: 'center',
         component: simpleCard,
-        borderColor: '#a0a0ef'
+        borderColor: '#C189F8'
       },
     ],
     columns: [
@@ -241,11 +241,13 @@ export default function controller() {
           const findLead = leads.find(l => l.id == a.lead_id)
           const slr_id = a.priority_score >= 0 ? a.slr_id : findLead?.slr_id
 
-          return {...(findLead || {}), slr_id, distance: a.distance || 0, priority_score: a.priority_score}
+          return {...(findLead || {}), slr_id, distance: a.distance || 0, priority_score: a.priority_score, ld_id: a.lead_id}
         });
 
-        const assigneds = mappedAssigneds.filter(l => l.id && l.slr_id > 0)
 
+        const assigneds = mappedAssigneds.filter(l => l.id && l.slr_id > 0)
+        const asdasassigneds = mappedAssigneds.filter(l => !l.id)
+        console.warn({asdasassigneds})
         if (followups.length) {
           await service.bulkCalculateDist({followups, assigneds}).then((res) => {
             const data = res.data

@@ -1,5 +1,5 @@
 <template>
-  <q-card bordered class="tw-border-l-2 tw-text-[9px]" :style="{ borderLeftColor: col?.borderColor }">
+  <q-card bordered class="tw-text-[9px]" :style="{ backgroundColor: col?.borderColor }">
     <q-card-section class="wrap q-px-sm q-pt-xs q-pb-none">
       <div class="tw-font-bold tw-text-gray-800" style="white-space: normal; word-wrap: break-word;">
         {{ row?.brnId }}: {{ row?.city }}, {{ row.state }} - <span
@@ -9,12 +9,9 @@
           row?.rnkDesc
         }}</span></div>
       <div class="tw-font-bold text-secondary tw-text-xs" v-if="row?.isFollowUp">Followup</div>
-      <div class="tw-font-semibold tw-text-gray-600">{{ this.$trd(row?.apptdate, {type: 'time'}) }}</div>
+      <div class="tw-font-semibold tw-text-gray-900">{{ this.$trd(row?.apptdate, {type: 'time'}) }}</div>
     </q-card-section>
     <q-card-section class="wrap q-px-sm q-py-none">
-      <span v-if="row?.logit && row?.score">PSA: {{ this.$trc(row.score / row.logit, 'en-us') }}<br/></span>
-      <span v-if="row?.logit">Pct: {{ this.$trn(100 * row.logit) }}%<br/></span>
-      <span v-if="row?.score">EV: {{ this.$trc(row.score, 'en-us') }} <br/></span>
       <span v-if="row?.crTier">CR: {{ row.crTier }}</span>
     </q-card-section>
     <div class="flex q-px-sm justify-between items-center">
@@ -27,7 +24,7 @@
         size="12px"
         color="amber-8"
         :name="`fa-solid fa-lock${isBlock ? '' : '-open'}`"
-        @click="isBlock = !isBlock"/>
+        @click="blockCard = !blockCard"/>
     </div>
   </q-card>
 </template>

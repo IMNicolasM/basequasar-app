@@ -41,6 +41,7 @@
           </div>
         </div>
         <dynamic-table-clone
+          :tableProps="{dense: true, separator: 'cell'}"
           :columns="columns"
           :rows="assignedData"
           :loading="loading"
@@ -101,15 +102,24 @@ export default defineComponent({
     }
   }
 
-  #dynamic-table .q-tr .q-td {
-    padding: 2px; /* Reduce el padding en la primera columna */
-    white-space: nowrap; /* Evita que el contenido se quiebre en la primera columna */
-  }
+  #dynamic-table {
 
-  #dynamic-table .q-tr .q-td > * {
-    margin: 0;
-    padding: 0;
-  }
+    .q-table th,
+    .q-table td {
+      border-width: 1px;
+      border-color: $blue-grey-13;
+    }
 
+    .q-tr .q-td {
+      padding: 2px;
+      white-space: nowrap;
+    }
+
+    .q-tr .q-td > * {
+      margin: 0;
+      padding: 0;
+    }
+
+  }
 }
 </style>

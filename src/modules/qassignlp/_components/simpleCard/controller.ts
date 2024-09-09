@@ -1,4 +1,4 @@
-import {reactive,toRefs} from "vue";
+import {computed, reactive, toRefs} from "vue";
 import {i18n} from "../../../../plugins/utils";
 
 export default function controller(props, emit) {
@@ -10,7 +10,7 @@ export default function controller(props, emit) {
 
   // States
   const state = reactive({
-    isBlock: false,
+    blockCard: false,
     COLORS: {
       Verif: 'red',
       Set: 'red'
@@ -23,7 +23,11 @@ export default function controller(props, emit) {
   })
 
   // Computed
-  const computeds = {}
+  const computeds = {
+    isBlock: computed(() => {
+      return state.blockCard || props.row.priorityScore == -1
+    })
+  }
 
   // Methods
   const methods = {
