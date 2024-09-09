@@ -16,9 +16,11 @@ export default function controller(props, emit) {
       Set: 'red'
     },
     GRADE_COLORS: {
-      5: 'green',
-      3: '#df7315',
-      2: 'blue'
+      5: '#48BB78',
+      3: '#F5A623',
+      2: '#4A90E2',
+      6: '#9B59B6',
+      7: '#4A5568'
     }
   })
 

@@ -61,7 +61,8 @@ export default function controller() {
         label: i18n.tr('ileads.cms.form.morning'),
         field: 'slot1',
         align: 'center',
-        borderColor: '#4ADE80',
+        // borderColor: '#D1FAE5',
+        style: { backgroundColor: '#D1FAE5'},
         component: simpleCard
       },
       {
@@ -70,7 +71,8 @@ export default function controller() {
         field: 'slot2',
         align: 'center',
         component: simpleCard,
-        borderColor: '#F372B5'
+        style: { backgroundColor: '#FECACA'},
+        // borderColor: '#FECACA'
       },
       {
         name: 'slot3',
@@ -78,7 +80,8 @@ export default function controller() {
         field: 'slot3',
         align: 'center',
         component: simpleCard,
-        borderColor: '#60A5FA'
+        style: { backgroundColor: '#DBEAFE'}
+        // borderColor: '#DBEAFE'
       },
       {
         name: 'slot4',
@@ -86,7 +89,8 @@ export default function controller() {
         field: 'slot4',
         align: 'center',
         component: simpleCard,
-        borderColor: '#C189F8'
+        // borderColor: '#EDE9FE',
+        style: { backgroundColor: '#EDE9FE'}
       },
     ],
     columns: [

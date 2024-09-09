@@ -27,10 +27,10 @@
 
     <section class="relative-position tw-w-full tw-flex tw-flex-wrap md:tw-flex-nowrap tw-gutter-sm md:tw-gutter-md tw-gap-4">
       <div class="tw-w-full md:tw-w-[50%]">
-        <div class="text-primary text-weight-bold ellipsis title-content items-center tw-text-lg text-center">
+        <div class="text-primary text-weight-bold ellipsis title-content items-center tw-text-lg text-center tw-py-2">
           <label id="titleCrudTable">Sales Rep Availability</label>
         </div>
-        <div class="tw-sticky top-info tw-flex tw-items-center tw-p-1.5 tw-shadow-xs tw-z-10 tw-my-3 bg-white">
+        <div class="tw-sticky top-info tw-flex tw-items-center tw-p-1.5 tw-shadow-xs tw-z-10 tw-my-3.5 bg-white">
           <div class="tw-text-sm tw-font-semibold">
             # of Appointments:
             <span class="text-primary">{{ totalAssigns }}</span>
@@ -47,8 +47,8 @@
           :loading="loading"
         />
       </div>
-      <div class="tw-w-full md:tw-w-[50%] scroll-x tw-bg-gray-100 tw-rounded">
-        <div class="text-primary text-weight-bold ellipsis title-content items-center tw-text-lg text-center tw-pb-2">
+      <div class="tw-w-full md:tw-w-[50%] scroll-x">
+        <div class="text-primary text-weight-bold ellipsis title-content items-center tw-text-lg text-center tw-py-2">
           <label id="titleCrudTable">Appointments</label>
         </div>
         <div class="row q-col-gutter-x-sm tw-px-2" style="display: flex; flex-wrap: wrap;">
@@ -103,11 +103,14 @@ export default defineComponent({
   }
 
   #dynamic-table {
+    .q-table th {
+      padding-bottom: 12px;
+    }
 
     .q-table th,
     .q-table td {
-      border-width: 1px;
-      border-color: $blue-grey-13;
+      //border-width: 1px;
+      //border-color: $blue-grey-13;
     }
 
     .q-tr .q-td {

@@ -5,7 +5,8 @@
       Not on Schedule
     </div>
     <draggable
-      class="tw-flex wrap tw-items-center tw-justify-center tw-max-w-30 lg:tw-max-w-36 tw-min-h-5 tw-border tw-border-zinc-300"
+      v-else-if="data.data?.length || data.active === true"
+      class="tw-flex wrap tw-items-center tw-justify-center tw-max-w-32 lg:tw-max-w-38 tw-min-h-5 tw-border tw-border-[#B0BEC5] tw-m-auto tw-p-1"
       :list="data.data"
       :group="col.field || 'table'"
       item-key="id"
@@ -13,7 +14,7 @@
       @change="moveDrag"
     >
       <template #item="{ element }">
-        <div class="cursor-pointer q-pb-xs">
+        <div class="cursor-pointer q-pb-xs tw-w-30 lg:tw-w-36">
           <simple-card :row="element" :col="col" :block="block" />
         </div>
       </template>

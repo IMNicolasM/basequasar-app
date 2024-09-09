@@ -1,10 +1,11 @@
 <template>
   <div id="dynamic-kanban" class="flex row gap-3 tw-overflow-x-auto tw-whitespace-nowrap no-wrap">
-    <div v-for="column in columns" class="tw-min-w-24 tw-p-2 col-3">
+    <div v-for="column in columns" class="tw-min-w-24 tw-p-2 col-3" :style="column.style">
       <div v-if="column.label" class="kanban-title text-center text-capitalize tw-pb-4">
         <p>{{ column.label }}</p>
       </div>
       <draggable
+        class="tw-min-h-5 tw-border tw-border-[#B0BEC5] tw-p-1"
         :group="column.field"
         v-bind="kanbanProps"
         :list="rows[column.field]"
