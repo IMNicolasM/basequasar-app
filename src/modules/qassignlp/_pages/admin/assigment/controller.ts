@@ -254,7 +254,7 @@ export default function controller() {
         leads = leadsResponse.data
         const assigns = assignments.data
 
-        let followups = leads.filter(l => l.is_follow_up)
+        let leadsWitoutDis = leads.filter(l => l.is_follow_up)
         const mappedAssigneds = assigns.map(a => {
           const findLead = leads.find(l => l.id == a.lead_id)
           const slr_id = a.priority_score >= 0 ? a.slr_id : findLead?.slr_id
@@ -262,22 +262,24 @@ export default function controller() {
           return {...(findLead || {}), slr_id, distance: a.distance || 0, priority_score: a.priority_score, ld_id: a.lead_id}
         });
 
+        const filteredAssigns = mappedAssigneds.filter(l => l.id && l.slr_id > 0)
 
-        const assigneds = mappedAssigneds.filter(l => l.id && l.slr_id > 0)
-        // const asdasassigneds = mappedAssigneds.filter(l => !l.id)
-        // console.warn({asdasassigneds})
-        if (followups.length) {
-          await service.bulkCalculateDist({followups, assigneds}).then((res) => {
+        const assigneds = filteredAssigns.filter(l => l.distance > 0)
+        const aWitoutDis = filteredAssigns.filter(l => l.distance <= 0)
+
+        leadsWitoutDis = [...leadsWitoutDis, ...aWitoutDis]
+        if (leadsWitoutDis.length) {
+          await service.bulkCalculateDist({followups: leadsWitoutDis, assigneds}).then((res) => {
             const data = res.data
 
-            followups = followups.map(follow => {
+            leadsWitoutDis = leadsWitoutDis.map(follow => {
               const findFollow = data.find(f => f.id == follow.id)
               return {...follow, distance: findFollow?.distance || 0}
             })
           })
         }
 
-        const allAssigns = [...assigneds, ...followups].map(a => helper.snakeToCamelCaseKeys(a))
+        const allAssigns = [...assigneds, ...leadsWitoutDis].map(a => helper.snakeToCamelCaseKeys(a))
         idsAssigns = allAssigns.map(l => l.id)
 
         state.unMappedAssignedData = allAssigns;
