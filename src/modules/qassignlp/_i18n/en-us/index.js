@@ -8,7 +8,10 @@ export default {
       'title': {},
       'button': {},
       'table': {},
-      'label': {},
+      'label': {
+        'unlock': 'Unlock',
+        'lock': 'Lock'
+      },
       'form': {
         'apptdate': 'Appointment Date',
         'slrName': 'Sales Rep',

@@ -150,8 +150,8 @@ export default function controller() {
         }
       },
     },
-    openForm: false
-
+    openForm: false,
+    allBlock: false
   });
 
   // Computed
@@ -163,6 +163,7 @@ export default function controller() {
       const date = state.dynamicFilterValues.apptdate;
       const tomorrow = moment().add(1, 'days').startOf('day');
       const apptDate = moment(date);
+      const isBlock = state.allBlock;
 
       return [
         {
@@ -179,6 +180,13 @@ export default function controller() {
           action: () => methods.reCalc(date)
         },
         {
+          label: i18n.tr(`ileads.cms.label.${!isBlock?'':'un'}lock`),
+          props: {
+            icon: `fa-light fa-lock${isBlock?'':'-open'}`
+          },
+          action: () => methods.blockLeads(isBlock)
+        },
+        {
           label: i18n.tr('isite.cms.label.setup'),
           props: {
             icon: 'fa-light fa-gear'
@@ -191,6 +199,12 @@ export default function controller() {
 
   // Methods
   const methods = {
+    blockLeads(lock = false) {
+      state.unMappedAssignedData = state.unMappedAssignedData.map(a => ({...a, priorityScore: lock ? 0 : -1}))
+      state.allBlock = !lock
+      const message = !lock ? "All assigned leads have been blocked." : "All assigned leads have been unblocked."
+      alert.info(message)
+    },
     toggleDynamicFilterModal() {
       state.showDynamicFilterModal = !state.showDynamicFilterModal;
     },
@@ -250,8 +264,8 @@ export default function controller() {
 
 
         const assigneds = mappedAssigneds.filter(l => l.id && l.slr_id > 0)
-        const asdasassigneds = mappedAssigneds.filter(l => !l.id)
-        console.warn({asdasassigneds})
+        // const asdasassigneds = mappedAssigneds.filter(l => !l.id)
+        // console.warn({asdasassigneds})
         if (followups.length) {
           await service.bulkCalculateDist({followups, assigneds}).then((res) => {
             const data = res.data
@@ -349,6 +363,7 @@ export default function controller() {
         if (leadId && index >= 0) {
           state.unAssignedData[`slot${slot}`][index] = {
             ...element,
+            priorityScore: 0,
             distance: null,
             slrId: null
           };
@@ -367,7 +382,7 @@ export default function controller() {
         }
         await service.calculateAndUpdate(body).then(r => {
           if (r.distance) {
-            const saveElement = {...element, slrId: row.slrId, distance: r.distance}
+            const saveElement = {...element, slrId: row.slrId, distance: r.distance, priorityScore: -1}
             const filterAssignUnMapped = state.unMappedAssignedData.filter(l => l.id !== leadId)
             state.unMappedAssignedData = [...filterAssignUnMapped, saveElement];
           }

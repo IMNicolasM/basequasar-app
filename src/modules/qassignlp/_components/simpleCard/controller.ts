@@ -1,4 +1,4 @@
-import {computed, reactive, toRefs} from "vue";
+import {computed, reactive, toRefs, watch} from "vue";
 import {i18n} from "../../../../plugins/utils";
 
 export default function controller(props, emit) {
@@ -10,7 +10,6 @@ export default function controller(props, emit) {
 
   // States
   const state = reactive({
-    blockCard: false,
     COLORS: {
       Verif: 'red',
       Set: 'red'
@@ -27,7 +26,7 @@ export default function controller(props, emit) {
   // Computed
   const computeds = {
     isBlock: computed(() => {
-      return state.blockCard || props.row.priorityScore == -1
+      return props.row.priorityScore == -1
     })
   }
 
@@ -38,6 +37,11 @@ export default function controller(props, emit) {
       let distance = parseInt(dist) || 0
 
       return Math.round(distance / average_speed_mph * 60)
+    },
+    togglePriority() {
+      if (props.row) {
+        props.row.priorityScore = props.row.priorityScore == -1 ? 0 : -1;
+      }
     }
   }
 

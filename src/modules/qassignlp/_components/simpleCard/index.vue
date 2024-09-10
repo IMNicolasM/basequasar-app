@@ -14,17 +14,21 @@
     <q-card-section class="wrap q-px-sm q-py-none">
       <span v-if="row?.crTier">CR: {{ row.crTier }}</span>
     </q-card-section>
-    <div class="flex q-px-sm justify-between items-center">
-      <div class="flex-grow text-center tw-font-semibold tw-text-gray-600" v-if="row?.distance">
-        ({{ parseInt(row.distance) }} mi /
-        {{ getDriveTime(row.distance) }} mins)
+    <div class="flex q-px-sm items-center">
+      <!-- Distancia centrada -->
+      <div class="full-width tw-max-w-[90%] flex-grow text-center tw-font-semibold tw-text-gray-600" v-if="row?.distance">
+        ({{ parseInt(row.distance) }} mi / {{ getDriveTime(row.distance) }} mins)
       </div>
-      <q-icon
-        v-if="block"
-        size="12px"
-        color="amber-8"
-        :name="`fa-solid fa-lock${isBlock ? '' : '-open'}`"
-        @click="blockCard = !blockCard"/>
+      <q-space v-else />
+      <!-- Icono del lock con max-width de 10% -->
+      <div class="tw-max-w-[10%] tw-text-right">
+        <q-icon
+          v-if="block"
+          size="12px"
+          color="amber-8"
+          :name="`fa-solid fa-lock${isBlock ? '-open' : ''}`"
+          @click="togglePriority"/>
+      </div>
     </div>
   </q-card>
 </template>
