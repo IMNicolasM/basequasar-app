@@ -30,7 +30,7 @@
         <div class="text-primary text-weight-bold ellipsis title-content items-center tw-text-lg text-center tw-py-2">
           <label id="titleCrudTable">Sales Rep Availability</label>
         </div>
-        <div class="tw-sticky top-info tw-flex tw-items-center tw-p-1.5 tw-shadow-xs tw-z-10 tw-my-3.5 bg-white">
+        <div class="tw-sticky top-info tw-flex tw-items-center tw-p-1.5 tw-shadow-xs tw-z-10 tw-mt-3 tw-mb-2 bg-white">
           <div class="tw-text-sm tw-font-semibold">
             # of Appointments:
             <span class="text-primary">{{ totalAssigns }}</span>
@@ -40,15 +40,17 @@
             <span class="text-primary">{{ this.$trn(totalMiles) }}</span>
           </div>
         </div>
-        <template v-for="(assigns, key) of assignedData" :key="key">
-          <dynamic-table-clone
-            class="q-py-sm"
-            :tableProps="{dense: true, separator: 'cell'}"
-            :columns="columns"
-            :rows="assigns"
-            :loading="loading"
-          />
-        </template>
+        <div class="scroll-x tw-overflow-x-auto">
+          <template v-for="(assigns, key) of assignedData" :key="key">
+            <dynamic-table-clone
+              class="q-py-sm tw-min-w-full"
+              :tableProps="{dense: true, separator: 'cell', virtualScroll: false}"
+              :columns="columns"
+              :rows="assigns"
+              :loading="loading"
+            />
+          </template>
+        </div>
       </div>
       <div class="tw-w-full md:tw-w-[50%] scroll-x">
         <div class="text-primary text-weight-bold ellipsis title-content items-center tw-text-lg text-center tw-py-2">
@@ -106,16 +108,15 @@ export default defineComponent({
   }
 
   #dynamic-table {
+    .q-table__middle {
+      width: 100%;
+      overflow: visible;
+    }
+
     .q-table th {
-      padding-bottom: 12px;
-    }
-
-    .q-table td {
-      border: 1px solid #94A3B8;
-    }
-
-    .q-table td:first-child {
-      width: 110px;
+      background-color: $primary;
+      color: white;
+      padding-bottom: 6px;
     }
 
     .q-tr .q-td {
@@ -124,8 +125,20 @@ export default defineComponent({
     }
 
     .q-tr .q-td > * {
-      margin: 0;
       padding: 0;
+      height: 100%;
+      width: 100%;
+
+      margin: 0 auto;
+      max-width: 160px;
+
+      @media screen and (max-width: $breakpoint-md) {
+        max-width: 130px;
+      }
+    }
+
+    .q-table td:first-child, .q-table td:first-child div {
+      width: 100px;
     }
 
   }

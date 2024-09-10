@@ -50,7 +50,7 @@ export default function controller() {
       }
     },
     filtersUnassign: {},
-    assignedData: [],
+    assignedData: {},
     employees: [],
     unMappedAssignedData: [],
     unAssignedData: {},
@@ -232,7 +232,7 @@ export default function controller() {
       }
 
       await Promise.all([
-        service.getData('apiRoutes.qassignlp.employees', refresh, params),
+        service.getData('apiRoutes.qassignlp.employees', refresh, {params, new: true}),
         service.getData('apiRoutes.qassignlp.leads', refresh, params),
         service.getData('apiRoutes.qassignlp.assignments', refresh, params)
       ]).then(async ([employees, leadsResponse, assignments]) => {
@@ -263,12 +263,10 @@ export default function controller() {
           })
         }
 
-        const allAssigns = [...assigneds, ...followups]
+        const allAssigns = [...assigneds, ...followups].map(a => helper.snakeToCamelCaseKeys(a))
         idsAssigns = allAssigns.map(l => l.id)
 
         state.unMappedAssignedData = allAssigns;
-
-        methods.mappedAssigns(allAssigns, otherFilters)
       }).catch(e => {
         alert.error(i18n.tr('isite.cms.message.errorRequest'))
         console.error(e)
@@ -367,16 +365,11 @@ export default function controller() {
           slot,
           rowInfo: row
         }
-
-        const leadIndex = state.assignedData.findIndex(l => l.slrId == row.slrId)
-
         await service.calculateAndUpdate(body).then(r => {
           if (r.distance) {
-            state.assignedData[leadIndex][`slot${slot}`].data[index].distance = r.distance
-            state.unMappedAssignedData = [
-              ...state.unMappedAssignedData,
-              {...element, slrId: row.slrId, distance: r.distance}
-            ];
+            const saveElement = {...element, slrId: row.slrId, distance: r.distance}
+            const filterAssignUnMapped = state.unMappedAssignedData.filter(l => l.id !== leadId)
+            state.unMappedAssignedData = [...filterAssignUnMapped, saveElement];
           }
         }).catch(e => {
           console.error(e)
@@ -392,51 +385,59 @@ export default function controller() {
 
 
       for (const assign of assigns) {
-        let {slr_id, slot, brn_id} = assign;
-        if (!!salesId && salesId !== slr_id) continue
-        slr_id = parseInt(slr_id)
+        let {slrId, slot} = assign;
+        if (!!salesId && salesId !== slrId) continue
+        slrId = parseInt(slrId)
+
+        const findEmp = emps.find(emp => emp.id == slrId)
+
+        if(!findEmp) {
+          console.warn("Not Found Emp: ", {assign, emps})
+          continue
+        }
+
+        const {brn_id, LastName, FirstName, slots} = findEmp;
+
         if(!mappedData[brn_id]) {
           mappedData[brn_id] = []
         }
 
-        let findIndexEmp = mappedData[brn_id].findIndex(emp => emp.slrId == slr_id) || - 1
+        let findIndexEmp = mappedData[brn_id].findIndex(emp => emp.slrId == slrId)
         if (findIndexEmp < 0) {
-          mappedData[brn_id].push(methods.initializeMappedData(slr_id));
+          mappedData[brn_id].push(methods.initializeMappedData(slrId, `${LastName}, ${FirstName}`, brn_id));
           findIndexEmp = mappedData[brn_id].length - 1
+          slots.forEach(s => {
+            mappedData[brn_id][findIndexEmp][`slot${s}`].active = true
+          })
         }
-        mappedData[brn_id][findIndexEmp][`slot${slot}`].data.push(helper.snakeToCamelCaseKeys(assign));
+        mappedData[brn_id][findIndexEmp][`slot${slot}`].data.push(assign);
       }
 
       for (const emp of emps) {
-        const {id, FirstName, LastName, brn_id, slots} = emp;
-        let findIndexEmp = (mappedData[brn_id] || []).findIndex(emp => emp.slrId == id)
+          const {id, FirstName, LastName, brn_id, slots} = emp;
+          let findIndexEmp = (mappedData[brn_id] || []).findIndex(emp => emp.slrId == id)
 
-        if(filterBrn !== 'ALL' && !brns.includes(brn_id) && findIndexEmp < 0) continue;
-        if (findIndexEmp < 0 && !slots.length) continue;
+          if(filterBrn !== 'ALL' && !brns.includes(brn_id) && findIndexEmp < 0) continue;
+          if (findIndexEmp < 0 && !slots.length) continue;
 
-        if(!mappedData[brn_id]) {
-          mappedData[brn_id] = []
+          if(!mappedData[brn_id]) {
+            mappedData[brn_id] = []
+          }
+
+          if (findIndexEmp < 0) {
+            mappedData[brn_id].push(methods.initializeMappedData(id, `${LastName}, ${FirstName}`, brn_id));
+            findIndexEmp = mappedData[brn_id].length - 1
+            slots.forEach(s => {
+              mappedData[brn_id][findIndexEmp][`slot${s}`].active = true
+            })
+          }
         }
 
-        if (findIndexEmp < 0) {
-          mappedData[brn_id].push(methods.initializeMappedData(id, `${LastName}, ${FirstName}`, brn_id));
-          findIndexEmp = mappedData[brn_id].length - 1
-        } else {
-          mappedData[brn_id][findIndexEmp].slrName = `${LastName}, ${FirstName}`;
-          mappedData[brn_id][findIndexEmp].brnId = brn_id;
-        }
-
-        slots.forEach(s => {
-          mappedData[brn_id][findIndexEmp][`slot${s}`].active = true
-        })
+      for (const map in mappedData) {
+        mappedData[map] = mappedData[map].sort((a, b) => a.slrName.localeCompare(b.slrName))
       }
 
-      const valuesMap: any = Object.values(mappedData || {})
-
-      console.warn({valuesMap})
-
-      const assignedData = valuesMap//.sort((a, b) => a.brnId.localeCompare(b.brnId))
-      state.assignedData = assignedData
+      state.assignedData = mappedData || {}
     },
     async reCalc(apptdate) {
       state.loading = true
@@ -459,6 +460,9 @@ export default function controller() {
   watch(() => state.unMappedAssignedData, (newValue) => {
     state.totalAssigns = newValue.length
     state.totalMiles = newValue.reduce((prev, curr) => prev + parseInt(curr.distance || 0), 0)
+
+    let otherFilters: any = state.dynamicFilterValues
+    methods.mappedAssigns(newValue, otherFilters)
   }, {deep: true})
 
   onMounted(() => {
@@ -477,7 +481,6 @@ export default function controller() {
       ...state.columns,
       ...slotColumns
     ]
-    console.warn()
   })
 
   return {...refs, ...(toRefs(state)), ...computeds, ...methods};
