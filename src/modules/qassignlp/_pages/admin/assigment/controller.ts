@@ -386,39 +386,56 @@ export default function controller() {
     },
     mappedAssigns(assigns = [], otherFilters) {
       const {brn_id: filterBrn, slr_id: salesId} = otherFilters
+      const brns = filterBrn.split(',')
       let mappedData: any = {}
       const emps = state.employees;
 
 
       for (const assign of assigns) {
-        let {slr_id, slot} = assign;
+        let {slr_id, slot, brn_id} = assign;
         if (!!salesId && salesId !== slr_id) continue
         slr_id = parseInt(slr_id)
-        if (!mappedData[slr_id]) {
-          mappedData[slr_id] = methods.initializeMappedData(slr_id);
+        if(!mappedData[brn_id]) {
+          mappedData[brn_id] = []
         }
-        mappedData[slr_id][`slot${slot}`].data.push(helper.snakeToCamelCaseKeys(assign));
+
+        let findIndexEmp = mappedData[brn_id].findIndex(emp => emp.slrId == slr_id) || - 1
+        if (findIndexEmp < 0) {
+          mappedData[brn_id].push(methods.initializeMappedData(slr_id));
+          findIndexEmp = mappedData[brn_id].length - 1
+        }
+        mappedData[brn_id][findIndexEmp][`slot${slot}`].data.push(helper.snakeToCamelCaseKeys(assign));
       }
 
       for (const emp of emps) {
-        const {id, FirstName, LastName, brn_id, tms_id} = emp;
-        if (filterBrn !== 'ALL' && (filterBrn !== brn_id && !mappedData[id])) continue;
-        if (!mappedData[id] && tms_id == null) continue
+        const {id, FirstName, LastName, brn_id, slots} = emp;
+        let findIndexEmp = (mappedData[brn_id] || []).findIndex(emp => emp.slrId == id)
 
-        if (!mappedData[id]) {
-          mappedData[id] = methods.initializeMappedData(id, `${LastName}, ${FirstName}`, brn_id);
+        if(filterBrn !== 'ALL' && !brns.includes(brn_id) && findIndexEmp < 0) continue;
+        if (findIndexEmp < 0 && !slots.length) continue;
+
+        if(!mappedData[brn_id]) {
+          mappedData[brn_id] = []
         }
 
-        mappedData[id].slrName = `${LastName}, ${FirstName}`;
-        mappedData[id].brnId = brn_id;
+        if (findIndexEmp < 0) {
+          mappedData[brn_id].push(methods.initializeMappedData(id, `${LastName}, ${FirstName}`, brn_id));
+          findIndexEmp = mappedData[brn_id].length - 1
+        } else {
+          mappedData[brn_id][findIndexEmp].slrName = `${LastName}, ${FirstName}`;
+          mappedData[brn_id][findIndexEmp].brnId = brn_id;
+        }
 
-        if (tms_id == null) continue
-        mappedData[id][`slot${tms_id}`].active = true;
+        slots.forEach(s => {
+          mappedData[brn_id][findIndexEmp][`slot${s}`].active = true
+        })
       }
 
       const valuesMap: any = Object.values(mappedData || {})
 
-      const assignedData = valuesMap.sort((a, b) => a.brnId.localeCompare(b.brnId))
+      console.warn({valuesMap})
+
+      const assignedData = valuesMap//.sort((a, b) => a.brnId.localeCompare(b.brnId))
       state.assignedData = assignedData
     },
     async reCalc(apptdate) {

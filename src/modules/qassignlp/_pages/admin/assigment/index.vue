@@ -40,12 +40,15 @@
             <span class="text-primary">{{ this.$trn(totalMiles) }}</span>
           </div>
         </div>
-        <dynamic-table-clone
-          :tableProps="{dense: true, separator: 'cell'}"
-          :columns="columns"
-          :rows="assignedData"
-          :loading="loading"
-        />
+        <template v-for="(assigns, key) of assignedData" :key="key">
+          <dynamic-table-clone
+            class="q-py-sm"
+            :tableProps="{dense: true, separator: 'cell'}"
+            :columns="columns"
+            :rows="assigns"
+            :loading="loading"
+          />
+        </template>
       </div>
       <div class="tw-w-full md:tw-w-[50%] scroll-x">
         <div class="text-primary text-weight-bold ellipsis title-content items-center tw-text-lg text-center tw-py-2">
@@ -107,10 +110,12 @@ export default defineComponent({
       padding-bottom: 12px;
     }
 
-    .q-table th,
     .q-table td {
-      //border-width: 1px;
-      //border-color: $blue-grey-13;
+      border: 1px solid #94A3B8;
+    }
+
+    .q-table td:first-child {
+      width: 110px;
     }
 
     .q-tr .q-td {
