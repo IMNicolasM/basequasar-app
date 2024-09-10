@@ -26,7 +26,7 @@
     />
 
     <section class="relative-position tw-w-full tw-flex tw-flex-wrap md:tw-flex-nowrap tw-gutter-sm md:tw-gutter-md tw-gap-4">
-      <div class="tw-w-full md:tw-w-[50%]">
+      <div class="tw-w-full md:tw-w-[60%]">
         <div class="text-primary text-weight-bold ellipsis title-content items-center tw-text-lg text-center tw-py-2">
           <label id="titleCrudTable">Sales Rep Availability</label>
         </div>
@@ -52,7 +52,7 @@
           </template>
         </div>
       </div>
-      <div class="tw-w-full md:tw-w-[50%] scroll-x">
+      <div class="tw-w-full md:tw-w-[40%] scroll-x">
         <div class="text-primary text-weight-bold ellipsis title-content items-center tw-text-lg text-center tw-py-2">
           <label id="titleCrudTable">Appointments</label>
         </div>
