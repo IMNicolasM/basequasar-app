@@ -27,7 +27,7 @@
           v-if="block"
           size="12px"
           color="amber-8"
-          :name="`fa-solid fa-lock${isBlock ? '-open' : ''}`"
+          :name="`fa-solid fa-lock${isBlock ? '' : '-open'}`"
           @click="togglePriority"/>
       </div>
     </div>

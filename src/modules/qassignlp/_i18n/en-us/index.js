@@ -9,8 +9,8 @@ export default {
       'button': {},
       'table': {},
       'label': {
-        'unlock': 'Unlock',
-        'lock': 'Lock'
+        'unlock': 'Unlock All Assigned Appointments',
+        'lock': 'Lock All Assigned Appointments'
       },
       'form': {
         'apptdate': 'Appointment Date',
