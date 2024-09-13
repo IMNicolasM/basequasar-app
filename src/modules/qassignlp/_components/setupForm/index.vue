@@ -168,7 +168,59 @@ export default {
             type: 'number',
             label: this.$tr('ileads.cms.form.daysSalesman')
           },
-        }
+        },
+        profitWeight: {
+          value: 30,
+          type: 'input',
+          colClass: 'col-12 col-md-6',
+          required: true,
+          help: {description: this.$tr('ileads.cms.messages.values0to100')},
+          props: {
+            type: 'number',
+            label: this.$tr('ileads.cms.form.profitWeight'),
+            rules: [
+              val => val >= 0 && val <= 100 || this.$tr('ileads.cms.messages.valuesBetween0to100')
+            ],
+          },
+        },
+        currentDistanceWeight: {
+          value: 60,
+          type: 'input',
+          colClass: 'col-12 col-md-6',
+          required: true,
+          help: {description: this.$tr('ileads.cms.messages.values0to100')},
+          props: {
+            type: 'number',
+            label: this.$tr('ileads.cms.form.currentDistanceWeight'),
+            rules: [
+              val => val >= 0 && val <= 100 || this.$tr('ileads.cms.messages.valuesBetween0to100')
+            ],
+          },
+        },
+        futureDistanceWeight: {
+          value: 10,
+          type: 'input',
+          colClass: 'col-12 col-md-6',
+          required: true,
+          help: {description: this.$tr('ileads.cms.messages.values0to100')},
+          props: {
+            type: 'number',
+            label: this.$tr('ileads.cms.form.futureDistanceWeight'),
+            rules: [
+              val => val >= 0 && val <= 100 || this.$tr('ileads.cms.messages.valuesBetween0to100')
+            ],
+          },
+        },
+        costPerMile: {
+          value: 0.6,
+          type: 'input',
+          colClass: 'col-12 col-md-6',
+          required: true,
+          props: {
+            type: 'number',
+            label: this.$tr('ileads.cms.form.costPerMile')
+          },
+        },
       }
     }
   },
