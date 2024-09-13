@@ -61,8 +61,7 @@ export default function controller() {
         label: i18n.tr('ileads.cms.form.morning'),
         field: 'slot1',
         align: 'center',
-        // borderColor: '#D1FAE5',
-        style: { backgroundColor: '#D1FAE5'},
+         borderColor: '#D1FAE5',
         component: simpleCard
       },
       {
@@ -71,8 +70,7 @@ export default function controller() {
         field: 'slot2',
         align: 'center',
         component: simpleCard,
-        style: { backgroundColor: '#FECACA'},
-        // borderColor: '#FECACA'
+        borderColor: '#FECACA'
       },
       {
         name: 'slot3',
@@ -80,8 +78,7 @@ export default function controller() {
         field: 'slot3',
         align: 'center',
         component: simpleCard,
-        style: { backgroundColor: '#DBEAFE'}
-        // borderColor: '#DBEAFE'
+        borderColor: '#DBEAFE'
       },
       {
         name: 'slot4',
@@ -89,8 +86,7 @@ export default function controller() {
         field: 'slot4',
         align: 'center',
         component: simpleCard,
-        // borderColor: '#EDE9FE',
-        style: { backgroundColor: '#EDE9FE'}
+        borderColor: '#EDE9FE'
       },
     ],
     columns: [
@@ -180,9 +176,16 @@ export default function controller() {
           action: () => methods.reCalc(date)
         },
         {
-          label: i18n.tr(`ileads.cms.label.${!isBlock?'':'un'}lock`),
+          label: i18n.tr('isite.cms.label.save'),
           props: {
-            icon: `fa-light fa-lock${isBlock?'':'-open'}`
+            icon: 'fa-light fa-floppy-disk'
+          },
+          action: () => methods.saveData()
+        },
+        {
+          label: i18n.tr(`ileads.cms.label.${!isBlock ? '' : 'un'}lock`),
+          props: {
+            icon: `fa-light fa-lock${isBlock ? '' : '-open'}`
           },
           action: () => methods.blockLeads(isBlock)
         },
@@ -228,17 +231,17 @@ export default function controller() {
 
       await service.getData('apiRoutes.qassignlp.progress', refresh, {apptdate: params.filter.apptdate})
         .then(res => {
-          if(res.data.is_runing == true)  recalcLoading = true
+          if (res.data.is_runing == true) recalcLoading = true
           else state.isRuningReCalc = false
         })
         .catch(e => {
           recalcLoading = true
-          alert.error(e.response.data.message || "The AutoAssigner is running now")
+          alert.warning(e.response.data.message || "The AutoAssigner is running now")
         })
 
       if (recalcLoading) {
         state.isRuningReCalc = true
-        alert.error("The AutoAssigner is running yet. Please Refresh before some time")
+        alert.warning("The AutoAssigner is running yet. Please Refresh before some time")
         state.unMappedAssignedData = []
         state.employees = []
         state.allUnAssign = {}
@@ -259,7 +262,13 @@ export default function controller() {
           const findLead = leads.find(l => l.id == a.lead_id)
           const slr_id = a.priority_score >= 0 ? a.slr_id : findLead?.slr_id
 
-          return {...(findLead || {}), slr_id, distance: a.distance || 0, priority_score: a.priority_score, ld_id: a.lead_id}
+          return {
+            ...(findLead || {}),
+            slr_id,
+            distance: a.distance || 0,
+            priority_score: a.priority_score,
+            ld_id: a.lead_id
+          }
         });
 
         const filteredAssigns = mappedAssigneds.filter(l => l.id && l.slr_id > 0)
@@ -300,6 +309,7 @@ export default function controller() {
       })
 
       state.allUnAssign = mappedUnAssigns
+      methods.filterUnAssign()
       state.loading = false
     },
     filterUnAssign() {
@@ -354,23 +364,27 @@ export default function controller() {
     },
     async moveDrag({evt, row, kanban}) {
       if (!evt) return
-      const {added} = evt;
+      const {added, removed} = evt;
 
-      const leadId = added?.element.id;
-      const slot = added?.element.slot;
+      const element = added?.element;
+      const leadId = element?.id;
+      const slot = element?.slot;
       const index = added?.newIndex;
-      const element = added?.element
 
       if (kanban == 'unassign') {
         if (leadId && index >= 0) {
-          state.unAssignedData[`slot${slot}`][index] = {
-            ...element,
-            priorityScore: 0,
-            distance: null,
-            slrId: null
-          };
+          const newElement = { ...element, priorityScore: 0, distance: null, slrId: null };
+
+          state.allUnAssign[`slot${slot}`].splice(index, 0, newElement);
+          methods.filterUnAssign()
 
           state.unMappedAssignedData = state.unMappedAssignedData.filter(l => l.id !== leadId)
+        } else if (removed) {
+          const element = removed?.element;
+          const leadId = element?.id;
+          const slot = element?.slot;
+
+          state.allUnAssign[`slot${slot}`] = state.allUnAssign[`slot${slot}`].filter(l => l.id != leadId)
         }
         return
       }
@@ -400,7 +414,6 @@ export default function controller() {
       let mappedData: any = {}
       const emps = state.employees;
 
-
       for (const assign of assigns) {
         let {slrId, slot} = assign;
         if (!!salesId && salesId !== slrId) continue
@@ -408,14 +421,14 @@ export default function controller() {
 
         const findEmp = emps.find(emp => emp.id == slrId)
 
-        if(!findEmp) {
+        if (!findEmp) {
           console.warn("Not Found Emp: ", {assign, emps})
           continue
         }
 
         const {brn_id, LastName, FirstName, slots} = findEmp;
 
-        if(!mappedData[brn_id]) {
+        if (!mappedData[brn_id]) {
           mappedData[brn_id] = []
         }
 
@@ -431,24 +444,26 @@ export default function controller() {
       }
 
       for (const emp of emps) {
-          const {id, FirstName, LastName, brn_id, slots} = emp;
-          let findIndexEmp = (mappedData[brn_id] || []).findIndex(emp => emp.slrId == id)
-
-          if(filterBrn !== 'ALL' && !brns.includes(brn_id) && findIndexEmp < 0) continue;
-          if (findIndexEmp < 0 && !slots.length) continue;
-
-          if(!mappedData[brn_id]) {
-            mappedData[brn_id] = []
-          }
-
-          if (findIndexEmp < 0) {
-            mappedData[brn_id].push(methods.initializeMappedData(id, `${LastName}, ${FirstName}`, brn_id));
-            findIndexEmp = mappedData[brn_id].length - 1
-            slots.forEach(s => {
-              mappedData[brn_id][findIndexEmp][`slot${s}`].active = true
-            })
-          }
+        const {id, FirstName, LastName, brn_id, slots} = emp;
+        let findIndexEmp = (mappedData[brn_id] || []).findIndex(emp => emp.slrId == id)
+        if(id == 8094) {
+          console.warn({emp})
         }
+        if (filterBrn !== 'ALL' && !brns.includes(brn_id) && findIndexEmp < 0) continue;
+        if (findIndexEmp < 0 && !slots.length) continue;
+
+        if (!mappedData[brn_id]) {
+          mappedData[brn_id] = []
+        }
+
+        if (findIndexEmp < 0) {
+          mappedData[brn_id].push(methods.initializeMappedData(id, `${LastName}, ${FirstName}`, brn_id));
+          findIndexEmp = mappedData[brn_id].length - 1
+          slots.forEach(s => {
+            mappedData[brn_id][findIndexEmp][`slot${s}`].active = true
+          })
+        }
+      }
 
       for (const map in mappedData) {
         mappedData[map] = mappedData[map].sort((a, b) => a.slrName.localeCompare(b.slrName))
@@ -468,12 +483,37 @@ export default function controller() {
           state.loading = false
           console.error(e)
         })
-    }
-  };
+    },
+    saveData() {
+      state.loading = true;
 
-  watch(() => state.allUnAssign, (newValue) => {
-    methods.filterUnAssign()
-  })
+      const data = methods.unmappedLeads();
+
+
+      state.loading = false;
+    },
+    unmappedLeads() {
+      const assignedLeads = state.assignedData;
+
+      let response = []
+
+      for (const key in assignedLeads) {
+        const employees = assignedLeads[key];
+        employees.forEach(e => {
+          const {slot1, slot2, slot3, slot4} = e
+          response = [...response, ...slot1.data, ...slot2.data, ...slot3.data, ...slot4.data]
+        })
+      }
+
+      const unAssigns: any = clone(state.allUnAssign)
+
+      const {slot1, slot2, slot3, slot4} = unAssigns
+
+      const unAssignData = [...slot1, ...slot2, ...slot3, ...slot4].map(l => ({ ...l, slrId: 0 }))
+
+      return [...response, ...unAssignData]
+    },
+  };
   watch(() => state.unMappedAssignedData, (newValue) => {
     state.totalAssigns = newValue.length
     state.totalMiles = newValue.reduce((prev, curr) => prev + parseInt(curr.distance || 0), 0)

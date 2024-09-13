@@ -4,7 +4,7 @@
       <div class="tw-font-bold tw-text-gray-800" style="white-space: normal; word-wrap: break-word;">
         {{ row?.brnId }}: {{ row?.city }}, {{ row.state }} - <span
         :style="{color: COLORS[row?.dspId] || 'black'}">{{ row?.dspId }}</span>
-        - {{row.id}}
+      </div>
       </div>
       <div v-if="row?.rnkId > 0">Grade: <span :style="{color: GRADE_COLORS[row?.rnkId] || 'black', fontWeight: 'bold'}">{{
           row?.rnkDesc

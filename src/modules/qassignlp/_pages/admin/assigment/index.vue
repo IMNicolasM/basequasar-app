@@ -121,6 +121,7 @@ export default defineComponent({
 
     .q-tr .q-td {
       padding: 2px;
+      border: 1px solid #d4d4d4;
       white-space: nowrap;
     }
 

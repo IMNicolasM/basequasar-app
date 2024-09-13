@@ -1,7 +1,6 @@
 <template>
-  <div class="tw-text-center"  style="white-space: normal; word-wrap: break-word;">
+  <div class="tw-text-center flex column tw-items-center tw-justify-center"  style="white-space: normal; word-wrap: break-word;">
     <span class="tw-font-bold">{{ row.brnId }}</span>
-    <br/>
     {{ row.slrName }}
   </div>
 </template>
