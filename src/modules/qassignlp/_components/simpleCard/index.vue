@@ -5,7 +5,6 @@
         {{ row?.brnId }}: {{ row?.city }}, {{ row.state }} - <span
         :style="{color: COLORS[row?.dspId] || 'black'}">{{ row?.dspId }}</span>
       </div>
-      </div>
       <div v-if="row?.rnkId > 0">Grade: <span :style="{color: GRADE_COLORS[row?.rnkId] || 'black', fontWeight: 'bold'}">{{
           row?.rnkDesc
         }}</span></div>
