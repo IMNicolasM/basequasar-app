@@ -164,6 +164,7 @@ export default {
           value: 7,
           type: 'input',
           colClass: 'col-12 col-md-6',
+          help: {description: this.$tr('ileads.cms.messages.descDaysSalesman')},
           props: {
             type: 'number',
             label: this.$tr('ileads.cms.form.daysSalesman')
@@ -174,10 +175,11 @@ export default {
           type: 'input',
           colClass: 'col-12 col-md-6',
           required: true,
-          help: {description: this.$tr('ileads.cms.messages.values0to100')},
+          help: {description: this.$tr('ileads.cms.messages.descProfit')},
           props: {
             type: 'number',
             label: this.$tr('ileads.cms.form.profitWeight'),
+            suffix: "%",
             rules: [
               val => val >= 0 && val <= 100 || this.$tr('ileads.cms.messages.valuesBetween0to100')
             ],
@@ -188,10 +190,11 @@ export default {
           type: 'input',
           colClass: 'col-12 col-md-6',
           required: true,
-          help: {description: this.$tr('ileads.cms.messages.values0to100')},
+          help: {description: this.$tr('ileads.cms.messages.descNextAppt')},
           props: {
             type: 'number',
             label: this.$tr('ileads.cms.form.currentDistanceWeight'),
+            suffix: "%",
             rules: [
               val => val >= 0 && val <= 100 || this.$tr('ileads.cms.messages.valuesBetween0to100')
             ],
@@ -202,10 +205,11 @@ export default {
           type: 'input',
           colClass: 'col-12 col-md-6',
           required: true,
-          help: {description: this.$tr('ileads.cms.messages.values0to100')},
+          help: {description: this.$tr('ileads.cms.messages.descFutureAppt')},
           props: {
             type: 'number',
             label: this.$tr('ileads.cms.form.futureDistanceWeight'),
+            suffix: "%",
             rules: [
               val => val >= 0 && val <= 100 || this.$tr('ileads.cms.messages.valuesBetween0to100')
             ],
@@ -216,8 +220,10 @@ export default {
           type: 'input',
           colClass: 'col-12 col-md-6',
           required: true,
+          help: {description: this.$tr('ileads.cms.messages.descCostPerMile')},
           props: {
             type: 'number',
+            suffix: "$",
             label: this.$tr('ileads.cms.form.costPerMile')
           },
         },
