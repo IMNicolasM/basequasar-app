@@ -1,6 +1,6 @@
 export default {
   assigments: {
-    permission: 'ileads.assigments.manage',
+    permission: 'ilead.leads.manage',
     activated: true,
     authenticated: true,
     path: '/lead/appointments',
@@ -8,20 +8,6 @@ export default {
     page: () => import('src/modules/qassignlp/_pages/admin/assigment/index.vue'),
     layout: () => import('layouts/master.vue'),
     title: 'ileads.cms.sidebar.adminAssignments',
-    icon: 'fa-light fa-bullseye-pointer',
-    subHeader: {
-      refresh: true,
-    }
-  },
-  prevAssigments: {
-    permission: 'ileads.assigments.manage',
-    activated: false,
-    authenticated: true,
-    path: '/lead/prev-appointments',
-    name: 'qassignlp.admin.prevAssigments',
-    page: () => import('src/modules/qassignlp/_pages/admin/prevAssigment/index.vue'),
-    layout: () => import('layouts/master.vue'),
-    title: 'ileads.cms.sidebar.adminPrevAssignments',
     icon: 'fa-light fa-bullseye-pointer',
     subHeader: {
       refresh: true,
