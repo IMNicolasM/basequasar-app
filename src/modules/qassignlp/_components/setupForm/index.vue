@@ -4,28 +4,9 @@
     <master-modal
       id="modalSetupForm" v-model="show" v-bind="modalProps" custom-position @hide="resetModal">
       <div class="modal-crud">
-        <div id="cardContent" class="row col-1">
-          <div class="relative-position col-12">
-            <q-form
-              autocorrect="off"
-              autocomplete="off"
-              ref="formContent"
-              class="row q-col-gutter-md col-12"
-              @submit="createItem"
-              @validation-error="$alert.error($tr('isite.cms.message.formInvalid'))"
-            >
-              <!--Fields-->
-              <div v-for="(field, key) in fields" :key="key" :ref="key" :class="field.colClass || 'col-12'">
-                <!--Dynamic field-->
-                <dynamic-field
-                  v-model="formTemplate[field.name || key]"
-                  :key="key"
-                  :field="{...field, testId: (field.testId  || field.name || key)}"
-                  :ref="`field-${field.name || key}`"
-                />
-              </div>
-            </q-form>
-          </div>
+        <div id="cardContent" class="row col-12">
+          <dynamic-form class="col-12 full-width" ref="refForm" v-model="formTemplate" formType="collapsible"
+                        :blocks="fields" no-actions no-reset-with-blocks-update @submit="createItem"/>
         </div>
       </div>
     </master-modal>
@@ -47,6 +28,16 @@ export default {
     show(newValue) {
       this.$emit('update:modelValue', this.show);
       if (newValue) this.initForm()
+    },
+    'formTemplate.name'(newValue) {
+      if(!this.goCreate) {
+        console.warn(newValue)
+        const config = this.loadedConfigs.find(i => i.id == newValue);
+
+        if(config) {
+          this.formTemplate = config
+        }
+      }
     }
   },
   mounted() {
@@ -59,7 +50,15 @@ export default {
       show: false,
       formTemplate: {},
       loading: false,
-      apiRoute: 'apiRoutes.qassignlp.config'
+      goCreate: false,
+      apiRoute: 'apiRoutes.qassignlp.config',
+      emptyConfig: {
+        name: '',
+        value: {},
+        active: '0',
+        isDefault: '0'
+      },
+      loadedConfigs: []
     };
   },
   computed: {
@@ -79,7 +78,7 @@ export default {
             }
           },
           {
-            action: () => this.$refs.formContent.submit(),
+            action: () => this.$refs.refForm.changeStep('next', true),
             props: {
               color: 'primary',
               label: this.$tr('isite.cms.label.apply')
@@ -89,189 +88,218 @@ export default {
       };
     },
     fields() {
-      return {
-        id: {value: ''},
-        milesHome: {
-          value: 120,
-          type: 'input',
-          colClass: 'col-12 col-md-6',
-          props: {
-            type: 'number',
-            label: this.$tr('ileads.cms.form.milesHome')
-          },
-        },
-        milesTrip: {
-          value: 100,
-          type: 'input',
-          colClass: 'col-12 col-md-6',
-          props: {
-            type: 'number',
-            label: this.$tr('ileads.cms.form.milesTrip')
-          },
-        },
-        brnId: {
-          value: ['ALL'],
-          type: 'select',
-          colClass: 'col-12 col-md-6',
-          props: {
-            label: this.$tr('ileads.cms.form.brnId'),
-            useInput: true,
-            useChips: true,
-            multiple: true,
-            options: [
-              {label: '-- ALL --', value: 'ALL'}
-            ]
-          },
-          loadOptions: {
-            apiRoute: 'apiRoutes.qassignlp.branches',
-            select: {label: 'label', id: 'value'}
+      return [
+        {
+          name: 'main',
+          title: this.$tr('ileads.cms.label.preset'),
+          fields: {
+            id: {value: ''},
+            company: {value: 'MAD'},
+            banner: {
+              type: 'banner',
+              colClass: 'col-12',
+              props: {
+                color: 'info',
+                icon: 'fas fa-exclamation-triangle',
+                message: this.goCreate ? this.$tr('ileads.cms.message.goSelectPreset') : this.$tr('ileads.cms.message.goCreatePreset'),
+                actions: [
+                  {
+                    props: {
+                      label: this.goCreate ? this.$tr('ileads.cms.message.selectPreset') : this.$tr('ileads.cms.message.createPreset')
+                    },
+                    action: () => {
+                      this.goCreate = !this.goCreate
+                      this.formTemplate = this.emptyConfig
+                    }
+                  }
+                ]
+              }
+            },
+            name: {
+              type: this.goCreate ? 'input' : 'select',
+              required: true,
+              colClass: 'col-6',
+              props: {
+                label: `${this.$tr('ileads.cms.label.name')}*`
+              },
+              ...(this.goCreate
+                ? {}
+                : {
+                    loadOptions: {
+                      apiRoute: 'apiRoutes.qassignlp.config',
+                      select: {label: 'name', id: 'id'}
+                    },
+                    loadedOptions: (val) => this.loadedConfigs = val
+                  }
+              )
+            },
+            active: {
+              value: '1',
+              type: 'select',
+              colClass: 'col-6',
+              required: true,
+              props: {
+                label: `${this.$tr('isite.cms.form.status')} *`,
+                options: [
+                  { label: this.$tr('isite.cms.label.enabled'), value: '1' },
+                  { label: this.$tr('isite.cms.label.disabled'), value: '0' }
+                ]
+              }
+            },
           }
         },
-        slot: {
-          value: [3],
-          type: 'select',
-          colClass: 'col-12 col-md-6',
-          props: {
-            label: this.$tr('ileads.cms.form.ignoreSlots'),
-            useInput: true,
-            useChips: true,
-            multiple: true,
-            options: [
-              {label: 'Slot 1', value: 1},
-              {label: 'Slot 2', value: 2},
-              {label: 'Slot 3', value: 3},
-              {label: 'Slot 4', value: 4}
-            ]
+        {
+          name: 'preset',
+          title: this.$tr('ilead.cms.label.infoPreset'),
+          fields: {
+            milesHome: {
+              value: 120,
+              type: 'input',
+              colClass: 'col-12 col-md-6',
+              props: {
+                type: 'number',
+                label: this.$tr('ileads.cms.form.milesHome')
+              },
+            },
+            milesTrip: {
+              value: 100,
+              type: 'input',
+              colClass: 'col-12 col-md-6',
+              props: {
+                type: 'number',
+                label: this.$tr('ileads.cms.form.milesTrip')
+              },
+            },
+            brnId: {
+              value: ['ALL'],
+              type: 'select',
+              colClass: 'col-12 col-md-6',
+              props: {
+                label: this.$tr('ileads.cms.form.brnId'),
+                useInput: true,
+                useChips: true,
+                multiple: true,
+                options: [
+                  {label: '-- ALL --', value: 'ALL'}
+                ]
+              },
+              loadOptions: {
+                apiRoute: 'apiRoutes.qassignlp.branches',
+                select: {label: 'label', id: 'value'}
+              }
+            },
+            slot: {
+              value: [3],
+              type: 'select',
+              colClass: 'col-12 col-md-6',
+              props: {
+                label: this.$tr('ileads.cms.form.ignoreSlots'),
+                useInput: true,
+                useChips: true,
+                multiple: true,
+                options: [
+                  {label: 'Slot 1', value: 1},
+                  {label: 'Slot 2', value: 2},
+                  {label: 'Slot 3', value: 3},
+                  {label: 'Slot 4', value: 4}
+                ]
+              }
+            },
+            rnkId: {
+              value: ['5', '6', '7'],
+              type: 'select',
+              colClass: 'col-12 col-md-6',
+              props: {
+                label: this.$tr('ileads.cms.form.ignoreRnkId'),
+                useInput: true,
+                useChips: true,
+                multiple: true
+              },
+              loadOptions: {
+                apiRoute: 'apiRoutes.qassignlp.rank',
+                select: {label: 'descr', id: 'id'},
+                requestParams: {filter: {active: true}}
+              }
+            },
+            daysSalesman: {
+              value: 7,
+              type: 'input',
+              colClass: 'col-12 col-md-6',
+              help: {description: this.$tr('ileads.cms.messages.descDaysSalesman')},
+              props: {
+                type: 'number',
+                label: this.$tr('ileads.cms.form.daysSalesman')
+              },
+            },
+            profitWeight: {
+              value: 30,
+              type: 'input',
+              colClass: 'col-12 col-md-6',
+              required: true,
+              help: {description: this.$tr('ileads.cms.messages.descProfit')},
+              props: {
+                type: 'number',
+                label: this.$tr('ileads.cms.form.profitWeight'),
+                suffix: "%",
+                rules: [
+                  val => val >= 0 && val <= 100 || this.$tr('ileads.cms.messages.valuesBetween0to100')
+                ],
+              },
+            },
+            currentDistanceWeight: {
+              value: 60,
+              type: 'input',
+              colClass: 'col-12 col-md-6',
+              required: true,
+              help: {description: this.$tr('ileads.cms.messages.descNextAppt')},
+              props: {
+                type: 'number',
+                label: this.$tr('ileads.cms.form.currentDistanceWeight'),
+                suffix: "%",
+                rules: [
+                  val => val >= 0 && val <= 100 || this.$tr('ileads.cms.messages.valuesBetween0to100')
+                ],
+              },
+            },
+            futureDistanceWeight: {
+              value: 10,
+              type: 'input',
+              colClass: 'col-12 col-md-6',
+              required: true,
+              help: {description: this.$tr('ileads.cms.messages.descFutureAppt')},
+              props: {
+                type: 'number',
+                label: this.$tr('ileads.cms.form.futureDistanceWeight'),
+                suffix: "%",
+                rules: [
+                  val => val >= 0 && val <= 100 || this.$tr('ileads.cms.messages.valuesBetween0to100')
+                ],
+              },
+            },
+            costPerMile: {
+              value: 0.6,
+              type: 'input',
+              colClass: 'col-12 col-md-6',
+              required: true,
+              help: {description: this.$tr('ileads.cms.messages.descCostPerMile')},
+              props: {
+                type: 'number',
+                suffix: "$",
+                label: this.$tr('ileads.cms.form.costPerMile')
+              },
+            },
           }
-        },
-        rnkId: {
-          value: ['5', '6', '7'],
-          type: 'select',
-          colClass: 'col-12 col-md-6',
-          props: {
-            label: this.$tr('ileads.cms.form.ignoreRnkId'),
-            useInput: true,
-            useChips: true,
-            multiple: true
-          },
-          loadOptions: {
-            apiRoute: 'apiRoutes.qassignlp.rank',
-            select: {label: 'descr', id: 'id'},
-            requestParams: {filter: {active: true}}
-          }
-        },
-        daysSalesman: {
-          value: 7,
-          type: 'input',
-          colClass: 'col-12 col-md-6',
-          help: {description: this.$tr('ileads.cms.messages.descDaysSalesman')},
-          props: {
-            type: 'number',
-            label: this.$tr('ileads.cms.form.daysSalesman')
-          },
-        },
-        profitWeight: {
-          value: 30,
-          type: 'input',
-          colClass: 'col-12 col-md-6',
-          required: true,
-          help: {description: this.$tr('ileads.cms.messages.descProfit')},
-          props: {
-            type: 'number',
-            label: this.$tr('ileads.cms.form.profitWeight'),
-            suffix: "%",
-            rules: [
-              val => val >= 0 && val <= 100 || this.$tr('ileads.cms.messages.valuesBetween0to100')
-            ],
-          },
-        },
-        currentDistanceWeight: {
-          value: 60,
-          type: 'input',
-          colClass: 'col-12 col-md-6',
-          required: true,
-          help: {description: this.$tr('ileads.cms.messages.descNextAppt')},
-          props: {
-            type: 'number',
-            label: this.$tr('ileads.cms.form.currentDistanceWeight'),
-            suffix: "%",
-            rules: [
-              val => val >= 0 && val <= 100 || this.$tr('ileads.cms.messages.valuesBetween0to100')
-            ],
-          },
-        },
-        futureDistanceWeight: {
-          value: 10,
-          type: 'input',
-          colClass: 'col-12 col-md-6',
-          required: true,
-          help: {description: this.$tr('ileads.cms.messages.descFutureAppt')},
-          props: {
-            type: 'number',
-            label: this.$tr('ileads.cms.form.futureDistanceWeight'),
-            suffix: "%",
-            rules: [
-              val => val >= 0 && val <= 100 || this.$tr('ileads.cms.messages.valuesBetween0to100')
-            ],
-          },
-        },
-        costPerMile: {
-          value: 0.6,
-          type: 'input',
-          colClass: 'col-12 col-md-6',
-          required: true,
-          help: {description: this.$tr('ileads.cms.messages.descCostPerMile')},
-          props: {
-            type: 'number',
-            suffix: "$",
-            label: this.$tr('ileads.cms.form.costPerMile')
-          },
-        },
-      }
+        }
+      ]
     }
   },
   methods: {
     //Init form
-    async initForm() {
-      this.loading = true;//loading
-      await this.getDataItem();//Get data item
-      this.loading = false;
-    },
-    //Get data category to update
-    getDataItem() {
-      return new Promise((resolve, reject) => {
-        let params = {//Params to request
-          refresh: true
-        };
-        this.$crud.index(this.apiRoute, params).then(response => {
-          const res = response.data[0];
-
-          const value = res.DataValue;
-
-          let objValue = {};
-          if (typeof value == 'string') {
-            try {
-              objValue = JSON.parse(value);
-            } catch (error) {
-              console.error("Invalid JSON string:", error);
-            }
-          }
-
-          this.formTemplate = {
-            ...this.formTemplate,
-            ...objValue
-          }
-          resolve(true);
-        }).catch(error => {
-          this.$apiResponse.handleError(error, () => {
-            this.messageWindow('error', this.$tr('isite.cms.message.errorRequest'));
-            reject(false);
-          });
-        });
-      });
-    },
+    async initForm() {},
     async createItem() {
-      if (await this.$refs.formContent.validate()) {
+      let isValid = await this.$refs.refForm.validateCompleteForm()
+      console.warn(this.formTemplate)
+      if (false) {
         this.loading = true;
         let formData = this.$clone(this.formTemplate);
         let requestInfo = {response: false, error: false};//Default request response

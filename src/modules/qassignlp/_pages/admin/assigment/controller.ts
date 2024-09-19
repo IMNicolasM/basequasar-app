@@ -61,7 +61,7 @@ export default function controller() {
         label: i18n.tr('ileads.cms.form.morning'),
         field: 'slot1',
         align: 'center',
-         borderColor: '#D1FAE5',
+        borderColor: '#D1FAE5',
         component: simpleCard
       },
       {
@@ -229,7 +229,7 @@ export default function controller() {
       let recalcLoading = false
 
 
-      await service.getData('apiRoutes.qassignlp.progress', refresh, {apptdate: params.filter.apptdate})
+      await service.getData('apiRoutes.qassignlp.progress', refresh, {filter: {apptdate: params.filter.apptdate}})
         .then(res => {
           if (res.data.is_runing == true) recalcLoading = true
           else state.isRuningReCalc = false
@@ -278,7 +278,7 @@ export default function controller() {
 
         leadsWitoutDis = [...leadsWitoutDis, ...aWitoutDis]
         if (leadsWitoutDis.length) {
-          await service.bulkCalculateDist({followups: leadsWitoutDis, assigneds}).then((res) => {
+          await service.bulkCalculateDist({attributes: {followups: leadsWitoutDis, assigneds}}).then((res) => {
             const data = res.data
 
             leadsWitoutDis = leadsWitoutDis.map(follow => {
@@ -373,7 +373,7 @@ export default function controller() {
 
       if (kanban == 'unassign') {
         if (leadId && index >= 0) {
-          const newElement = { ...element, priorityScore: 0, distance: null, slrId: null };
+          const newElement = {...element, priorityScore: 0, distance: null, slrId: null};
 
           state.allUnAssign[`slot${slot}`].splice(index, 0, newElement);
           methods.filterUnAssign()
@@ -396,7 +396,7 @@ export default function controller() {
           slot,
           rowInfo: row
         }
-        await service.calculateAndUpdate(body).then(r => {
+        await service.calculateAndUpdate({attributes: body}).then(r => {
           if (r.distance) {
             const saveElement = {...element, slrId: row.slrId, distance: r.distance, priorityScore: -1}
             const filterAssignUnMapped = state.unMappedAssignedData.filter(l => l.id !== leadId)
@@ -446,9 +446,7 @@ export default function controller() {
       for (const emp of emps) {
         const {id, FirstName, LastName, brn_id, slots} = emp;
         let findIndexEmp = (mappedData[brn_id] || []).findIndex(emp => emp.slrId == id)
-        if(id == 8094) {
-          console.warn({emp})
-        }
+
         if (filterBrn !== 'ALL' && !brns.includes(brn_id) && findIndexEmp < 0) continue;
         if (findIndexEmp < 0 && !slots.length) continue;
 
@@ -474,7 +472,7 @@ export default function controller() {
     async reCalc(apptdate) {
       state.loading = true
 
-      await service.recalculateLeads({apptdate})
+      await service.recalculateLeads({attributes: {apptdate}})
         .then(res => {
           state.isRuningReCalc = true
           alert.info('Start the Recalculate of Auto Assigner')
@@ -509,7 +507,7 @@ export default function controller() {
 
       const {slot1, slot2, slot3, slot4} = unAssigns
 
-      const unAssignData = [...slot1, ...slot2, ...slot3, ...slot4].map(l => ({ ...l, slrId: 0 }))
+      const unAssignData = [...slot1, ...slot2, ...slot3, ...slot4].map(l => ({...l, slrId: 0}))
 
       return [...response, ...unAssignData]
     },
