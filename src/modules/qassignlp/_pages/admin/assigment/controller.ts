@@ -173,7 +173,7 @@ export default function controller() {
             padding: 'xs md',
             color: 'green'
           },
-          action: () => methods.reCalc(date)
+          action: () => methods.openSetupForm()
         },
         {
           label: i18n.tr('isite.cms.label.save'),
@@ -188,14 +188,7 @@ export default function controller() {
             icon: `fa-light fa-lock${isBlock ? '' : '-open'}`
           },
           action: () => methods.blockLeads(isBlock)
-        },
-        {
-          label: i18n.tr('isite.cms.label.setup'),
-          props: {
-            icon: 'fa-light fa-gear'
-          },
-          action: () => methods.openSetupForm()
-        },
+        }
       ];
     }),
   };
@@ -469,10 +462,12 @@ export default function controller() {
 
       state.assignedData = mappedData || {}
     },
-    async reCalc(apptdate) {
+    async reCalc({apptdate, configId}) {
+      console.warn({apptdate, configId}, 'HeYOOOOOO')
+      return;
       state.loading = true
 
-      await service.recalculateLeads({attributes: {apptdate}})
+      await service.recalculateLeads({attributes: {apptdate, configId}})
         .then(res => {
           state.isRuningReCalc = true
           alert.info('Start the Recalculate of Auto Assigner')

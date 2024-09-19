@@ -1,6 +1,6 @@
 <template>
   <div id="assigns">
-    <setup-form v-model="openForm" />
+    <choose-preset v-model="openForm" @runAnr="(data) => reCalc({...data, apptdate: dynamicFilterValues.apptdate})" />
 
     <page-actions
       :excludeActions="excludeActions"
@@ -82,14 +82,14 @@ import controller from './controller';
 import dynamicFilter from 'modules/qsite/_components/master/dynamicFilter';
 import dynamicTableClone from 'modules/qassignlp/_components/dynamicTableClone/index.vue';
 import kanban from 'modules/qassignlp/_components/kanbanUnAssigns/index.vue'
-import setupForm from 'modules/qassignlp/_components/setupForm/index.vue'
+import choosePreset from 'modules/qassignlp/_components/choosePreset/index.vue'
 
 export default defineComponent({
   props: {},
   components: {
     kanban,
     dynamicFilter,
-    setupForm,
+    choosePreset,
     dynamicTableClone
   },
   setup() {

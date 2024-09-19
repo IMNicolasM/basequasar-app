@@ -5,6 +5,12 @@ export default {
         'adminAssignments': 'Assignments',
         'adminPrevAssignments': 'Preview Assignments'
       },
+      'create': {
+        'config': 'Create New Config'
+      },
+      'edit': {
+        'config': 'Update Config'
+      },
       'title': {},
       'button': {},
       'table': {},
@@ -30,7 +36,8 @@ export default {
         'costPerMile': 'Travel Cost per Mile ($)',
         'futureDistanceWeight': 'Future Route Efficiency (%)',
         'currentDistanceWeight': 'Next Appointment Proximity (%)',
-        'profitWeight': 'Profit Priority (%)'
+        'profitWeight': 'Profit Priority (%)',
+        'choosePreset': 'Choose a preset'
       },
       'messages': {
         'reassign': 'Re-calculate Assignments',
