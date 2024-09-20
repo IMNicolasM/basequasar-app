@@ -69,7 +69,13 @@ export default function controller(props, emit) {
   };
 
   // Methods
-  const methods = {}
+  const methods = {
+    emitData(){
+      emit('runAnr', state.formTemplate)
+      state.show = false
+    }
+
+  }
 
   // Mounted
   onMounted(() => {

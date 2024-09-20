@@ -3,7 +3,7 @@
     id="modalSetupForm" v-model="show" v-bind="modalProps">
     <div id="cardContent" class="row col-12">
       <dynamic-form class="col-12 full-width" ref="refForm" v-model="formTemplate" formType="grid"
-                    :blocks="fields" no-actions no-reset-with-blocks-update @submit="$emit('runAnr', formTemplate)"/>
+                    :blocks="fields" no-actions no-reset-with-blocks-update @submit="emitData"/>
     </div>
   </master-modal>
 </template>

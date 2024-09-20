@@ -19,7 +19,10 @@ export default {
         apiRoute: 'apiRoutes.qassignlp.config',
         permission: 'ilead.config-leads',
         create: {
-          title: this.$tr('ileads.cms.create.config')
+          title: this.$tr('ileads.cms.create.config'),
+          requestParams: {
+            notToSnakeCase: ['value']
+          },
         },
         read: {
           showAs: 'grid',
@@ -41,7 +44,10 @@ export default {
           },
         },
         update: {
-          title: this.$tr('ileads.cms.edit.config')
+          title: this.$tr('ileads.cms.edit.config'),
+          requestParams: {
+            notToSnakeCase: ['value']
+          },
         },
         delete: true,
         formLeft: {

@@ -242,7 +242,7 @@ export default function controller() {
       }
 
       await Promise.all([
-        service.getData('apiRoutes.qassignlp.employees', refresh, {params, new: true}),
+        service.getData('apiRoutes.qassignlp.employees', refresh, params),
         service.getData('apiRoutes.qassignlp.leads', refresh, params),
         service.getData('apiRoutes.qassignlp.assignments', refresh, params)
       ]).then(async ([employees, leadsResponse, assignments]) => {
@@ -463,8 +463,6 @@ export default function controller() {
       state.assignedData = mappedData || {}
     },
     async reCalc({apptdate, configId}) {
-      console.warn({apptdate, configId}, 'HeYOOOOOO')
-      return;
       state.loading = true
 
       await service.recalculateLeads({attributes: {apptdate, configId}})
