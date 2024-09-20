@@ -113,15 +113,27 @@ export default defineComponent({
       overflow: visible;
     }
 
+    .q-table thead th:first-child {
+      border-radius: $custom-radius 0 0 0;
+    }
+
+    .q-table thead th:last-child {
+      border-radius: 0 $custom-radius  0 0;
+    }
+
     .q-table th {
       background-color: $primary;
       color: white;
       padding-bottom: 6px;
     }
 
+    .q-tr .q-td:first-child div {
+      display: flex;
+    }
+
     .q-tr .q-td {
       padding: 2px;
-      border: 1px solid #d4d4d4;
+      border: 1px solid #eeeeee;
       white-space: nowrap;
     }
 

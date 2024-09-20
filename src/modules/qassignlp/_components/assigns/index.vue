@@ -6,7 +6,7 @@
     </div>
     <draggable
       v-if="!!(data.data?.length) || data.active === true"
-      :class="`flex wrap tw-items-center tw-justify-center tw-min-h-5 ${data.active === true ? 'tw-h-full' : ''}`"
+      :class="`full-width flex wrap tw-items-center tw-justify-center tw-min-h-5 ${data.active === true ? 'tw-h-full' : ''}`"
       :list="data.data"
       :group="col.field || 'table'"
       item-key="id"
