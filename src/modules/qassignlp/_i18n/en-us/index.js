@@ -37,7 +37,10 @@ export default {
         'futureDistanceWeight': 'Future Route Efficiency (%)',
         'currentDistanceWeight': 'Next Appointment Proximity (%)',
         'profitWeight': 'Profit Priority (%)',
-        'choosePreset': 'Choose a preset'
+        'choosePreset': 'Choose a preset',
+        'includeDsp': 'Include Dsp',
+        'includeSrc': 'Include Sources',
+        'ignoreCredit': 'Ignore Credits'
       },
       'messages': {
         'reassign': 'Re-calculate Assignments',

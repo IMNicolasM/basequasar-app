@@ -25,4 +25,11 @@ export default defineComponent({
 });
 </script>
 <style lang="scss">
+#dynamicFormComponentContent {
+  #gridContent div div {
+    box-shadow: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+  }
+}
 </style>

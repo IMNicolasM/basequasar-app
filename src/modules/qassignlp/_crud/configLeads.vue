@@ -4,11 +4,13 @@ export default {
   mounted() {
     this.$nextTick(function () {
       this.init()
+      this.creditOptions = (this.$getSetting('ilead::allCreditsCst') || []).map(i => ({label: i, value: i}))
     })
   },
   data() {
     return {
-      crudId: this.$uid()
+      crudId: this.$uid(),
+      creditOptions: []
     }
   },
   computed: {
@@ -101,6 +103,38 @@ export default {
               select: {label: 'label', id: 'value'}
             }
           },
+          includeDsp: {
+            value: [],
+            type: 'select',
+            colClass: 'col-12 col-md-6',
+            props: {
+              label: this.$tr('ileads.cms.form.includeDsp'),
+              useInput: true,
+              useChips: true,
+              multiple: true,
+            },
+            loadOptions: {
+              apiRoute: 'apiRoutes.qassignlp.disposition',
+              select: {label: 'descr', id: 'descr'},
+              requestParams: {filter: {active: 1}}
+            }
+          },
+          includeSrc: {
+            value: [],
+            type: 'select',
+            colClass: 'col-12 col-md-6',
+            props: {
+              label: this.$tr('ileads.cms.form.includeSrc'),
+              useInput: true,
+              useChips: true,
+              multiple: true,
+            },
+            loadOptions: {
+              apiRoute: 'apiRoutes.qassignlp.sources',
+              select: {label: 'SourceCode', id: 'SourceCode'},
+              requestParams: {filter: {active: 1}}
+            }
+          },
           slot: {
             value: [3],
             type: 'select',
@@ -134,6 +168,19 @@ export default {
               apiRoute: 'apiRoutes.qassignlp.rank',
               select: {label: 'descr', id: 'id'},
               requestParams: {filter: {active: true}}
+            }
+          },
+          ignoreCredit: {
+            value: [],
+            type: 'select',
+            colClass: 'col-12 col-md-6',
+            fakeFieldName: 'value',
+            props: {
+              label: this.$tr('ileads.cms.form.ignoreCredit'),
+              useInput: true,
+              useChips: true,
+              multiple: true,
+              options: this.creditOptions
             }
           },
           daysSalesman: {

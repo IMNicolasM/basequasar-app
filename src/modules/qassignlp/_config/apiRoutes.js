@@ -15,5 +15,6 @@ export default {
   config: `${urlBase}/config-leads`,
   calc: `${urlBase}/leads/calc`,
   disposition: `${urlBase}/dispositions`,
+  sources: `${urlBase}/sources`,
   progress: `${urlBase}/leads/anr-progress`,
 }
