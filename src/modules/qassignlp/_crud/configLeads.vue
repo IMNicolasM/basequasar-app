@@ -107,6 +107,7 @@ export default {
             value: [],
             type: 'select',
             colClass: 'col-12 col-md-6',
+            fakeFieldName: 'value',
             props: {
               label: this.$tr('ileads.cms.form.includeDsp'),
               useInput: true,
@@ -123,6 +124,7 @@ export default {
             value: [],
             type: 'select',
             colClass: 'col-12 col-md-6',
+            fakeFieldName: 'value',
             props: {
               label: this.$tr('ileads.cms.form.includeSrc'),
               useInput: true,
