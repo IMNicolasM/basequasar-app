@@ -23,7 +23,7 @@
       <!-- Icono del lock con max-width de 10% -->
       <div class="tw-max-w-[10%] tw-text-right">
         <q-icon
-          v-if="block"
+          v-if="block && !row?.isFollowUp"
           size="12px"
           color="amber-8"
           :name="`fa-solid fa-lock${isBlock ? '' : '-open'}`"

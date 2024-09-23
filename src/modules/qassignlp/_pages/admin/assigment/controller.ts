@@ -271,7 +271,8 @@ export default function controller() {
 
         leadsWitoutDis = [...leadsWitoutDis, ...aWitoutDis]
         if (leadsWitoutDis.length) {
-          await service.bulkCalculateDist({attributes: {followups: leadsWitoutDis, assigneds}}).then((res) => {
+          await service.bulkCalculateDist({attributes: {followups: leadsWitoutDis, assigneds}})
+            .then((res) => {
             const data = res.data
 
             leadsWitoutDis = leadsWitoutDis.map(follow => {
@@ -279,6 +280,7 @@ export default function controller() {
               return {...follow, distance: findFollow?.distance || 0}
             })
           })
+            .catch(e => alert.error('Distances could not be calculated'))
         }
 
         const allAssigns = [...assigneds, ...leadsWitoutDis].map(a => helper.snakeToCamelCaseKeys(a))
@@ -359,6 +361,8 @@ export default function controller() {
       if (!evt) return
       const {added, removed} = evt;
 
+      console.warn(evt)
+
       const element = added?.element;
       const leadId = element?.id;
       const slot = element?.slot;
@@ -390,11 +394,28 @@ export default function controller() {
           rowInfo: row
         }
         await service.calculateAndUpdate({attributes: body}).then(r => {
-          if (r.distance) {
-            const saveElement = {...element, slrId: row.slrId, distance: r.distance, priorityScore: -1}
-            const filterAssignUnMapped = state.unMappedAssignedData.filter(l => l.id !== leadId)
-            state.unMappedAssignedData = [...filterAssignUnMapped, saveElement];
-          }
+          const dists = r.data;
+          const saveElements = []
+          const unMapped = clone(state.unMappedAssignedData);
+
+          dists.forEach(d => {
+            if(leadId == d.id) {
+              const saveElement = {...element, slrId: row.slrId, distance: d.distance, priorityScore: -1}
+              saveElements.push(saveElement)
+            } else {
+              const findEl = unMapped.find(l => l.id == d.id)
+
+              if(findEl) {
+                const saveElement = {...findEl, distance: d.distance}
+
+                saveElements.push(saveElement)
+              } else console.warn("Not found Lead for Distance: ", d.id)
+            }
+          })
+
+          const onlyIds = saveElements.map(i => i.id)
+          const filterAssignUnMapped = state.unMappedAssignedData.filter(l => !onlyIds.includes(l.id))
+          state.unMappedAssignedData = [...filterAssignUnMapped, ...saveElements];
         }).catch(e => {
           console.error(e)
           alert.error('The distance could not be calculated')
@@ -456,11 +477,14 @@ export default function controller() {
         }
       }
 
-      for (const map in mappedData) {
-        mappedData[map] = mappedData[map].sort((a, b) => a.slrName.localeCompare(b.slrName))
-      }
+      const keys = Object.keys(mappedData).sort((a,b) => a.localeCompare(b))
+      let response: any = {};
 
-      state.assignedData = mappedData || {}
+      keys.forEach(key => {
+        response[key] = mappedData[key].sort((a, b) => a.slrName.localeCompare(b.slrName))
+      })
+
+      state.assignedData = response || {}
     },
     async reCalc({apptdate, configId}) {
       state.loading = true
@@ -479,30 +503,30 @@ export default function controller() {
       state.loading = true;
 
       const data = methods.unmappedLeads();
-
+      console.warn(data)
 
       state.loading = false;
     },
     unmappedLeads() {
-      const assignedLeads = state.assignedData;
+      const assignedLeads = state.unMappedAssignedData;
 
       let response = []
-
-      for (const key in assignedLeads) {
-        const employees = assignedLeads[key];
-        employees.forEach(e => {
-          const {slot1, slot2, slot3, slot4} = e
-          response = [...response, ...slot1.data, ...slot2.data, ...slot3.data, ...slot4.data]
-        })
-      }
-
-      const unAssigns: any = clone(state.allUnAssign)
-
-      const {slot1, slot2, slot3, slot4} = unAssigns
-
-      const unAssignData = [...slot1, ...slot2, ...slot3, ...slot4].map(l => ({...l, slrId: 0}))
-
-      return [...response, ...unAssignData]
+// console.warn(assignedLeads, )
+      // for (const key in assignedLeads) {
+      //   const employees = assignedLeads[key];
+      //   employees.forEach(e => {
+      //     const {slot1, slot2, slot3, slot4} = e
+      //     response = [...response, ...slot1.data, ...slot2.data, ...slot3.data, ...slot4.data]
+      //   })
+      // }
+      //
+      // const unAssigns: any = clone(state.allUnAssign)
+      //
+      // const {slot1, slot2, slot3, slot4} = unAssigns
+      //
+      // const unAssignData = [...slot1, ...slot2, ...slot3, ...slot4].map(l => ({...l, slrId: 0}))
+      //
+      // return [...response, ...unAssignData]
     },
   };
   watch(() => state.unMappedAssignedData, (newValue) => {
