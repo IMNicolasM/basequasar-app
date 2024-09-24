@@ -164,7 +164,7 @@ export default function controller() {
       return [
         {
           label: i18n.tr('ileads.cms.messages.reassign'),
-          vIf: apptDate.isSameOrAfter(tomorrow) && !state.isRuningReCalc,
+          vIf: /*apptDate.isSameOrAfter(tomorrow) &&*/ !state.isRuningReCalc,
           props: {
             icon: 'fa-light fa-shuffle',
             label: i18n.tr('ileads.cms.messages.reassign'),
@@ -222,7 +222,7 @@ export default function controller() {
       let recalcLoading = false
 
 
-      await service.getData('apiRoutes.qassignlp.progress', refresh, {filter: {apptdate: params.filter.apptdate}})
+      await service.getData('apiRoutes.qassignlp.progress', refresh, {filter: {field: 'apptdate', apptdate: params.filter.apptdate}})
         .then(res => {
           if (res.data.is_runing == true) recalcLoading = true
           else state.isRuningReCalc = false
