@@ -16,7 +16,6 @@ export default function controller() {
   const state = reactive({
     excludeActions: ['search', 'sync', 'export', 'recommendations'],
     loading: false,
-    isRuningReCalc: false,
     dynamicFilterValues: {},
     dynamicFilterSummary: {},
     showDynamicFilterModal: false,
@@ -164,7 +163,7 @@ export default function controller() {
       return [
         {
           label: i18n.tr('ileads.cms.messages.reassign'),
-          vIf: /*apptDate.isSameOrAfter(tomorrow) &&*/ !state.isRuningReCalc,
+          vIf: /*apptDate.isSameOrAfter(tomorrow) &&*/ true,
           props: {
             icon: 'fa-light fa-shuffle',
             label: i18n.tr('ileads.cms.messages.reassign'),
@@ -222,47 +221,32 @@ export default function controller() {
       await Promise.all([
         service.getData('apiRoutes.qassignlp.employees', refresh, params),
         service.getData('apiRoutes.qassignlp.leads', refresh, params),
-        service.getData('apiRoutes.qassignlp.assignments', refresh, {filter: {apptdate: otherFilters.apptdate, priorityScore: -1}})
+        service.getData('apiRoutes.qassignlp.assignments', refresh, {filter: {apptdate: otherFilters.apptdate, priorityScore: "-1"}})
       ]).then(async ([employees, leadsResponse, assignments]) => {
         state.employees = employees.data
         leads = leadsResponse.data
-        const assigns = assignments.data.filter(a => a.priority_score < 0)
+        const assigns = assignments.data
 
-        let leadsWitoutDis = leads.filter(l => l.is_follow_up || l.slr_id > 0)
+        let allAssigns = leads.filter(l => l.is_follow_up || l.slr_id > 0)
 
-        const mappedAssigneds = assigns.map(a => {
-          const findLead = leads.find(l => l.id == a.lead_id)
-          return {
-            ...(findLead || {}),
-            slr_id: a.slr_id,
-            distance: a.distance || 0,
-            priority_score: a.priority_score,
-            ld_id: a.lead_id
-          }
-        });
-
-        const filteredAssigns = mappedAssigneds.filter(l => l.id && l.slr_id > 0)
-
-        const assigneds = filteredAssigns.filter(l => l.distance > 0)
-        const aWitoutDis = filteredAssigns.filter(l => l.distance <= 0)
-
-        leadsWitoutDis = [...leadsWitoutDis, ...aWitoutDis]
-        if (leadsWitoutDis.length) {
-          await service.bulkCalculateDist({attributes: {followups: leadsWitoutDis, assigneds}})
+        if (allAssigns.length) {
+          await service.bulkCalculateDist({attributes: {leads: allAssigns}})
             .then((res) => {
               const data = res.data
 
-              leadsWitoutDis = leadsWitoutDis.map(follow => {
-                const findFollow = data.find(f => f.id == follow.id)
-                return {...follow, distance: findFollow?.distance || 0}
+              allAssigns = allAssigns.map(lead => {
+                const findDistance = data.find(d => d.id == lead.id)
+                const findAssign = assigns.find(a => a.leadId == lead.id)
+
+                const leadRes = {...lead, distance: findDistance?.distance || 0}
+                const res = helper.snakeToCamelCaseKeys(leadRes)
+                return {...(findAssign || {}), ...res}
               })
             })
             .catch(e => alert.error('Distances could not be calculated'))
         }
 
-        const allAssigns = [...assigneds, ...leadsWitoutDis].map(a => helper.snakeToCamelCaseKeys(a))
         idsAssigns = allAssigns.map(l => l.id)
-
         state.unMappedAssignedData = allAssigns;
       }).catch(e => {
         alert.error(i18n.tr('isite.cms.message.errorRequest'))
@@ -370,6 +354,7 @@ export default function controller() {
           slot,
           rowInfo: row
         }
+        let saveElement = {...element, slrId: row.slrId, priorityScore: -1}
         await service.calculateAndUpdate({attributes: body}).then(r => {
           const dists = r.data;
           const saveElements = []
@@ -377,7 +362,7 @@ export default function controller() {
 
           dists.forEach(d => {
             if (leadId == d.id) {
-              const saveElement = {...element, slrId: row.slrId, distance: d.distance, priorityScore: -1}
+              saveElement.distance = d.distance
               saveElements.push(saveElement)
             } else {
               const findEl = unMapped.find(l => l.id == d.id)
@@ -390,6 +375,7 @@ export default function controller() {
             }
           })
 
+          methods.updateCard({row: saveElement})
           const onlyIds = saveElements.map(i => i.id)
           const filterAssignUnMapped = state.unMappedAssignedData.filter(l => !onlyIds.includes(l.id))
           state.unMappedAssignedData = [...filterAssignUnMapped, ...saveElements];
@@ -468,7 +454,6 @@ export default function controller() {
 
       await service.recalculateLeads({attributes: {apptdate, configId}})
         .then(res => {
-          state.isRuningReCalc = true
           alert.info('Start the Recalculate of Auto Assigner')
         })
         .catch(e => {
@@ -511,11 +496,12 @@ export default function controller() {
         priorityScore: row.priorityScore,
         slrId: row.slrId,
         distance: row.distance,
-        apptdate: row.apptdate,
-        leadId: row.leadId,
+        apptdate: moment.utc(row.apptdate).startOf('day').toISOString(),
+        leadId: row.id,
         company: "MAD"
       }
-      service.updateLead(row.id, {attributes: body}).catch(e => alert.error('The lead could not be saved'))
+
+      service.updateLead(row.id, body).catch(e => alert.error('The lead could not be saved'))
     }
   };
   watch(() => state.unMappedAssignedData, (newValue) => {
