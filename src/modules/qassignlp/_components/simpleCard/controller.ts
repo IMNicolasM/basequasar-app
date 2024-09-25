@@ -40,7 +40,9 @@ export default function controller(props, emit) {
     },
     togglePriority() {
       if (props.row) {
-        props.row.priorityScore = props.row.priorityScore == -1 ? 0 : -1;
+        const prScore = props.row.priorityScore == -1 ? 0 : -1;
+        props.row.priorityScore = prScore;
+        emit('changeLock', {...props, prScore})
       }
     }
   }

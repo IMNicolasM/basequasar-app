@@ -34,6 +34,12 @@ export default {
         resolve(response)
       }).catch(error => reject(error))
     })
+  },
+  updateLead(id, body) {
+    return new Promise((resolve, reject) => {
+      baseService.update('apiRoutes.qassignlp.assignments', id, body).then(response => {
+        resolve(response)
+      }).catch(error => reject(error))
+    })
   }
-
 }

@@ -42,6 +42,7 @@ export default defineComponent({
     col: {default: null},
     block: {default: false}
   },
+  emits: ['changeLock'],
   setup(props, {emit}) {
     return controller(props, emit)
   }

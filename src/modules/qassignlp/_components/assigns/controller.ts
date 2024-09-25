@@ -18,6 +18,9 @@ export default function controller(props, emit) {
   const methods = {
     async moveDrag(evt) {
       emit('change', {evt, row: props.row})
+    },
+    changeData(data) {
+      emit('changeLock', data)
     }
   }
 

@@ -15,7 +15,7 @@
     >
       <template #item="{ element }">
         <div class="cursor-pointer q-pb-xs tw-min-w-28 md:tw-w-30 lg:tw-w-40">
-          <simple-card :row="element" :col="col" :block="block" />
+          <simple-card :row="element" :col="col" :block="block" @change-lock="changeData" />
         </div>
       </template>
     </draggable>
@@ -35,6 +35,7 @@ export default defineComponent({
     data: {default: null},
     block: {default: false}
   },
+  emits: ['changeLock', 'change'],
   setup(props, {emit, attrs}) {
     return { ...controller(props, emit), attrs };
   }

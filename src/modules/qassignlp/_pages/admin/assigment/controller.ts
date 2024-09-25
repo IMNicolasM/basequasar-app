@@ -219,45 +219,22 @@ export default function controller() {
       let leads = [];
       let idsAssigns = [];
 
-      let recalcLoading = false
-
-
-      await service.getData('apiRoutes.qassignlp.progress', refresh, {filter: {field: 'apptdate', apptdate: params.filter.apptdate}})
-        .then(res => {
-          if (res.data.is_runing == true) recalcLoading = true
-          else state.isRuningReCalc = false
-        })
-        .catch(e => {
-          recalcLoading = true
-          alert.warning(e.response.data.message || "The AutoAssigner is running now")
-        })
-
-      if (recalcLoading) {
-        state.isRuningReCalc = true
-        alert.warning("The AutoAssigner is running yet. Please Refresh before some time")
-        state.unMappedAssignedData = []
-        state.employees = []
-        state.allUnAssign = {}
-        return
-      }
-
       await Promise.all([
         service.getData('apiRoutes.qassignlp.employees', refresh, params),
         service.getData('apiRoutes.qassignlp.leads', refresh, params),
-        service.getData('apiRoutes.qassignlp.assignments', refresh, params)
+        service.getData('apiRoutes.qassignlp.assignments', refresh, {filter: {apptdate: otherFilters.apptdate, priorityScore: -1}})
       ]).then(async ([employees, leadsResponse, assignments]) => {
         state.employees = employees.data
         leads = leadsResponse.data
-        const assigns = assignments.data
+        const assigns = assignments.data.filter(a => a.priority_score < 0)
 
-        let leadsWitoutDis = leads.filter(l => l.is_follow_up)
+        let leadsWitoutDis = leads.filter(l => l.is_follow_up || l.slr_id > 0)
+
         const mappedAssigneds = assigns.map(a => {
           const findLead = leads.find(l => l.id == a.lead_id)
-          const slr_id = a.priority_score >= 0 ? a.slr_id : findLead?.slr_id
-
           return {
             ...(findLead || {}),
-            slr_id,
+            slr_id: a.slr_id,
             distance: a.distance || 0,
             priority_score: a.priority_score,
             ld_id: a.lead_id
@@ -273,13 +250,13 @@ export default function controller() {
         if (leadsWitoutDis.length) {
           await service.bulkCalculateDist({attributes: {followups: leadsWitoutDis, assigneds}})
             .then((res) => {
-            const data = res.data
+              const data = res.data
 
-            leadsWitoutDis = leadsWitoutDis.map(follow => {
-              const findFollow = data.find(f => f.id == follow.id)
-              return {...follow, distance: findFollow?.distance || 0}
+              leadsWitoutDis = leadsWitoutDis.map(follow => {
+                const findFollow = data.find(f => f.id == follow.id)
+                return {...follow, distance: findFollow?.distance || 0}
+              })
             })
-          })
             .catch(e => alert.error('Distances could not be calculated'))
         }
 
@@ -399,13 +376,13 @@ export default function controller() {
           const unMapped = clone(state.unMappedAssignedData);
 
           dists.forEach(d => {
-            if(leadId == d.id) {
+            if (leadId == d.id) {
               const saveElement = {...element, slrId: row.slrId, distance: d.distance, priorityScore: -1}
               saveElements.push(saveElement)
             } else {
               const findEl = unMapped.find(l => l.id == d.id)
 
-              if(findEl) {
+              if (findEl) {
                 const saveElement = {...findEl, distance: d.distance}
 
                 saveElements.push(saveElement)
@@ -477,7 +454,7 @@ export default function controller() {
         }
       }
 
-      const keys = Object.keys(mappedData).sort((a,b) => a.localeCompare(b))
+      const keys = Object.keys(mappedData).sort((a, b) => a.localeCompare(b))
       let response: any = {};
 
       keys.forEach(key => {
@@ -528,6 +505,18 @@ export default function controller() {
       //
       // return [...response, ...unAssignData]
     },
+    updateCard(data) {
+      const {row} = data;
+      const body = {
+        priorityScore: row.priorityScore,
+        slrId: row.slrId,
+        distance: row.distance,
+        apptdate: row.apptdate,
+        leadId: row.leadId,
+        company: "MAD"
+      }
+      service.updateLead(row.id, {attributes: body}).catch(e => alert.error('The lead could not be saved'))
+    }
   };
   watch(() => state.unMappedAssignedData, (newValue) => {
     state.totalAssigns = newValue.length
@@ -544,7 +533,8 @@ export default function controller() {
         template: assign,
         props: {block: true, calcDistance: true},
         events: {
-          change: (e) => methods.moveDrag(e)
+          change: (e) => methods.moveDrag(e),
+          changeLock: (e) => methods.updateCard(e)
         }
       }
     }));
