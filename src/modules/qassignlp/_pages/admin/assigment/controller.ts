@@ -50,10 +50,11 @@ export default function controller() {
     },
     filtersUnassign: {},
     assignedData: {},
+    allLeads: [],
     employees: [],
     unMappedAssignedData: [],
     unAssignedData: {},
-    allUnAssign: {},
+    allUnAssign: [],
     columnsSlot: [
       {
         name: 'slot1',
@@ -224,27 +225,20 @@ export default function controller() {
         service.getData('apiRoutes.qassignlp.assignments', refresh, {filter: {apptdate: otherFilters.apptdate, priorityScore: "-1"}})
       ]).then(async ([employees, leadsResponse, assignments]) => {
         state.employees = employees.data
-        leads = leadsResponse.data
+        leads = leadsResponse.data.map(l => helper.snakeToCamelCaseKeys(l))
+        state.allLeads = leads
+
         const assigns = assignments.data
+        let allAssigns = leads.filter(l => l.isFollowUp || l.slrId > 0).map(lead => {
+          const findAssign = assigns.find(a => a.leadId == lead.id)
+          console.warn({findAssign, lead})
+          return {...(findAssign || {}), ...lead}
+        })
 
-        let allAssigns = leads.filter(l => l.is_follow_up || l.slr_id > 0)
+        console.warn({allAssigns, assigns})
 
-        if (allAssigns.length) {
-          await service.bulkCalculateDist({attributes: {leads: allAssigns}})
-            .then((res) => {
-              const data = res.data
-
-              allAssigns = allAssigns.map(lead => {
-                const findDistance = data.find(d => d.id == lead.id)
-                const findAssign = assigns.find(a => a.leadId == lead.id)
-
-                const leadRes = {...lead, distance: findDistance?.distance || 0}
-                const res = helper.snakeToCamelCaseKeys(leadRes)
-                return {...(findAssign || {}), ...res}
-              })
-            })
-            .catch(e => alert.error('Distances could not be calculated'))
-        }
+        const distances = await methods.calcAllDist(allAssigns)
+        if(distances?.length) allAssigns = distances
 
         idsAssigns = allAssigns.map(l => l.id)
         state.unMappedAssignedData = allAssigns;
@@ -252,52 +246,42 @@ export default function controller() {
         alert.error(i18n.tr('isite.cms.message.errorRequest'))
         console.error(e)
       })
-      const unAssigns = leads.filter(l => !idsAssigns.includes(l.id));
-      let mappedUnAssigns = {}
+      const unAssigns = leads.filter(l => !idsAssigns.includes(l.id))
+      state.allUnAssign = unAssigns
+      methods.filterAndMapUnAssign()
 
-      unAssigns.forEach(u => {
-        let nameSlot = `slot${u.slot}`
-        const camelCaseResponse = helper.snakeToCamelCaseKeys(u)
-
-        if (!mappedUnAssigns[nameSlot]) mappedUnAssigns[nameSlot] = []
-
-        mappedUnAssigns[nameSlot].push(camelCaseResponse)
-      })
-
-      state.allUnAssign = mappedUnAssigns
-      methods.filterUnAssign()
       state.loading = false
     },
-    filterUnAssign() {
-      const filteredUnAssign: any = {}
+    filterAndMapUnAssign() {
       const filters = state.filtersUnassign;
       const unassign = state.allUnAssign;
 
-      if (!filters || !unassign) {
+      if (!filters || !unassign.length) {
         state.unAssignedData = unassign || {};
         return;
       }
 
-      for (const uKey in unassign) {
-        const res = unassign[uKey];
-
-        // AND FILTERS
-        const filteredRes = res.filter(item => {
-          return Object.keys(filters).every(key => {
-            let value = filters[key];
-            if (value === 'ALL') return true
-            if (key == 'brnId') {
-              value = value.split(',')
-              return value.includes(item[key])
-            }
-            return item[key] == value;
-          });
+      const filteredUnAssign = unassign.filter(item => {
+        return Object.keys(filters).every(key => {
+          let value = filters[key];
+          if (value === 'ALL') return true
+          if (key == 'brnId') {
+            value = value.split(',')
+            return value.includes(item[key])
+          }
+          return item[key] == value;
         });
+      })
 
-        filteredUnAssign[uKey] = filteredRes;
-      }
+      let mappedUnAssigns = {}
 
-      state.unAssignedData = filteredUnAssign
+      filteredUnAssign.forEach(u => {
+        let nameSlot = `slot${u.slot}`
+        if (!mappedUnAssigns[nameSlot]) mappedUnAssigns[nameSlot] = []
+        mappedUnAssigns[nameSlot].push(u)
+      })
+
+      state.unAssignedData = mappedUnAssigns
     },
     initializeMappedData(id, name = '', brnId = '') {
       return {
@@ -322,8 +306,6 @@ export default function controller() {
       if (!evt) return
       const {added, removed} = evt;
 
-      console.warn(evt)
-
       const element = added?.element;
       const leadId = element?.id;
       const slot = element?.slot;
@@ -333,16 +315,19 @@ export default function controller() {
         if (leadId && index >= 0) {
           const newElement = {...element, priorityScore: 0, distance: null, slrId: null};
 
-          state.allUnAssign[`slot${slot}`].splice(index, 0, newElement);
-          methods.filterUnAssign()
+          const filterUnAssign = state.allUnAssign.filter(l => l.id !== leadId)
+          state.allUnAssign = [...filterUnAssign, newElement];
+          methods.filterAndMapUnAssign()
 
           state.unMappedAssignedData = state.unMappedAssignedData.filter(l => l.id !== leadId)
+          methods.updateCard({row: newElement})
         } else if (removed) {
           const element = removed?.element;
           const leadId = element?.id;
           const slot = element?.slot;
 
-          state.allUnAssign[`slot${slot}`] = state.allUnAssign[`slot${slot}`].filter(l => l.id != leadId)
+          state.allUnAssign = state.allUnAssign.filter(l => l.id !== leadId)
+          methods.filterAndMapUnAssign()
         }
         return
       }
@@ -371,7 +356,7 @@ export default function controller() {
                 const saveElement = {...findEl, distance: d.distance}
 
                 saveElements.push(saveElement)
-              } else console.warn("Not found Lead for Distance: ", d.id)
+              } else console.warn("Not found Lead for Distance: ", {d})
             }
           })
 
@@ -449,47 +434,71 @@ export default function controller() {
 
       state.assignedData = response || {}
     },
-    async reCalc({apptdate, configId}) {
+    async reCalc(body) {
+      alert.info('Start the Recalculate of Auto Assigner')
       state.loading = true
 
-      await service.recalculateLeads({attributes: {apptdate, configId}})
-        .then(res => {
-          console.warn(res)
-          alert.info('Start the Recalculate of Auto Assigner')
+      await service.recalculateLeads({attributes: body})
+        .then(async res => {
+          const leadBlocks = state.unMappedAssignedData.filter(l => l.priorityScore == -1)
+          const leads = state.allLeads;
+          const assigns = res.data.map(a => {
+            const lead = leads.find(l => l.id == a.lead_id)
+
+            return {
+              ...lead,
+              distance: a.distance,
+              slrId: a.slr_id
+            }
+          })
+          const followups = leads.filter(l => l.isFollowUp)
+
+          let allAssign = [...assigns, ...followups, ...leadBlocks]
+
+          const distances = await methods.calcAllDist(allAssign)
+          if(distances?.length) allAssign = distances
+
+          state.unMappedAssignedData = allAssign
+
+          const idAssigns = allAssign.map(i => i.id)
+
+          const unAssigns = leads.filter(l => !idAssigns.includes(l.id))
+          state.allUnAssign = unAssigns
+          methods.filterAndMapUnAssign()
         })
         .catch(e => {
-          state.loading = false
+          alert.error('Auto Assigner Failed')
           console.error(e)
         })
-    },
-    saveData() {
-      state.loading = true;
 
-      const data = methods.unmappedLeads();
-      console.warn(data)
+      state.loading = false
+    },
+    async calcAllDist(leads) {
+      let response = []
+      if(!leads?.length) return response;
+
+      await service.bulkCalculateDist({attributes: {leads}})
+        .then((res) => {
+          const data = res.data
+
+          response = leads.map(lead => {
+            const findDistance = data.find(d => d.id == lead.id)
+            return {...lead, distance: findDistance?.distance || 0}
+          })
+        })
+        .catch(e => alert.error('Distances could not be calculated'))
+
+      return response
+    },
+    async saveData() {
+      state.loading = true;
+      const data = [...state.allUnAssign, ...state.unMappedAssignedData]
+
+      await service.leadBulkCreateOrUpdate(data)
+        .then(a => alert.info('Leads could be saved'))
+        .catch(e => alert.error('The leads could not be saved'))
 
       state.loading = false;
-    },
-    unmappedLeads() {
-      const assignedLeads = state.unMappedAssignedData;
-
-      let response = []
-// console.warn(assignedLeads, )
-      // for (const key in assignedLeads) {
-      //   const employees = assignedLeads[key];
-      //   employees.forEach(e => {
-      //     const {slot1, slot2, slot3, slot4} = e
-      //     response = [...response, ...slot1.data, ...slot2.data, ...slot3.data, ...slot4.data]
-      //   })
-      // }
-      //
-      // const unAssigns: any = clone(state.allUnAssign)
-      //
-      // const {slot1, slot2, slot3, slot4} = unAssigns
-      //
-      // const unAssignData = [...slot1, ...slot2, ...slot3, ...slot4].map(l => ({...l, slrId: 0}))
-      //
-      // return [...response, ...unAssignData]
     },
     updateCard(data) {
       const {row} = data;

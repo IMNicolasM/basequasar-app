@@ -62,7 +62,7 @@
               <dynamic-field
                 v-model="filtersUnassign[field.name || key]"
                 :field="field"
-                @update:modelValue="filterUnAssign"
+                @update:modelValue="filterAndMapUnAssign"
               />
             </div>
           </template>

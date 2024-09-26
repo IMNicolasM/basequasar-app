@@ -41,5 +41,14 @@ export default {
         resolve(response)
       }).catch(error => reject(error))
     })
+  },
+  leadBulkCreateOrUpdate(leads: any[] = []) {
+    return new Promise((resolve, reject) => {
+      //Request
+      // @ts-ignore
+      baseService.post(`${config('apiRoutes.qassignlp.assignments')}/bulk/update`, {attributes: leads}).then(response => {
+        resolve(true);
+      }).catch(error => reject(error));
+    });
   }
 }
