@@ -454,6 +454,7 @@ export default function controller() {
 
       await service.recalculateLeads({attributes: {apptdate, configId}})
         .then(res => {
+          console.warn(res)
           alert.info('Start the Recalculate of Auto Assigner')
         })
         .catch(e => {
@@ -498,6 +499,7 @@ export default function controller() {
         distance: row.distance,
         apptdate: moment.utc(row.apptdate).startOf('day').toISOString(),
         leadId: row.id,
+        slot: row.slot,
         company: "MAD"
       }
 
