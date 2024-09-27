@@ -231,11 +231,8 @@ export default function controller() {
         const assigns = assignments.data
         let allAssigns = leads.filter(l => l.isFollowUp || l.slrId > 0).map(lead => {
           const findAssign = assigns.find(a => a.leadId == lead.id)
-          console.warn({findAssign, lead})
           return {...(findAssign || {}), ...lead}
         })
-
-        console.warn({allAssigns, assigns})
 
         const distances = await methods.calcAllDist(allAssigns)
         if(distances?.length) allAssigns = distances
