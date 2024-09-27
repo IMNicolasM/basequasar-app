@@ -88,18 +88,3 @@
 [submodule "src/modules/qrequestable"]
 	path = src/modules/qrequestable
 	url = https://github.com/imagina/qrequestable.git
-[submodule "src/modules/qslider"]
-	path = src/modules/qslider
-	url = https://github.com/imagina/qslider.git
-[submodule "src/modules/qwebhook"]
-	path = src/modules/qwebhook
-	url = https://github.com/imagina/qwebhook.git
-[submodule "src/modules/qaccounting"]
-	path = src/modules/qaccounting
-	url = https://github.com/imagina/qaccounting.git
-[submodule "src/modules/qtask"]
-	path = src/modules/qtask
-	url = https://github.com/imagina/qtask.git
-[submodule "src/modules/qcomment"]
-	path = src/modules/qcomment
-	url = https://github.com/imagina/qcomment.git
