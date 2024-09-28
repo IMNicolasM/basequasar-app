@@ -46,24 +46,24 @@ export default {
             ]
           }
         },
-        crud: {
-          ...globalData,
-          value: null,
-          type: 'crud',
-          props: {
-            crudType: 'select',
-            imageField: 'mediaFiles.mainimage.url',
-            crudData: import('modules/qblog/_crud/categories'),
-            customData: {
-              read: {
-                requestParams: {include: 'parent', filter: {status: 1}}
-              }
-            },
-            crudProps: {
-              label: 'Type: CRUD'
-            },
-          },
-        },
+        // crud: {
+        //   ...globalData,
+        //   value: null,
+        //   type: 'crud',
+        //   props: {
+        //     crudType: 'select',
+        //     imageField: 'mediaFiles.mainimage.url',
+        //     crudData: import('modules//_crud/categories'),
+        //     customData: {
+        //       read: {
+        //         requestParams: {include: 'parent', filter: {status: 1}}
+        //       }
+        //     },
+        //     crudProps: {
+        //       label: 'Type: CRUD'
+        //     },
+        //   },
+        // },
         input: {
           ...globalData,
           type: 'input',

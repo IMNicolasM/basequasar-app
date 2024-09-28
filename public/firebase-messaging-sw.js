@@ -16,7 +16,7 @@ const initializingFirebaseApp = async () => {
         const md5Hash = CryptoJS.MD5(`${window.location.origin}${moment().format('YYYY-MM-DD')}firebase`).toString();
         const response = await fetch(`https://staging-siembra-coffe.ozonohosting.com/api/notification/v1/providers/firebase?filter={%22field%22:%20%22system_name%22}&token=${md5Hash}`);
         const json = await response.json();
-    
+
         if(json.errors === 'Unauthorized') {
             resolve(response);
             return
@@ -31,8 +31,8 @@ const initializingFirebaseApp = async () => {
             appId: json.data.fields.firebaseAppId,
             measurementId: json.data.fields.firebaseMeasurementId
         });
-    
-    
+
+
         // Retrieve an instance of Firebase Messaging so that it can handle background
         // messages.
         const messaging = firebase.messaging();
@@ -43,5 +43,5 @@ const initializingFirebaseApp = async () => {
 }
 
 self.addEventListener('install', (event) => {
-    event.waitUntil(initializingFirebaseApp());
+    //event.waitUntil(initializingFirebaseApp());
 });
