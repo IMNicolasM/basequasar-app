@@ -7,7 +7,8 @@ tagsToParceHost.forEach(tagToReplace => host = host.replace(tagToReplace, ''));
 let loadFrom = host.split('/')[1];
 
 export default {
-  baseUrl: 'https://n8ndtm.eastus.cloudapp.azure.com/webhook/78ccce39-3ea4-4dd1-bdf2-ef965be48350',
+  // baseUrl: 'https://localhost:7116',
+  baseUrl: 'https://app-anr-backend-dev-eus.azurewebsites.net',
   version: pjson.version,//Package version
   mode: (loadFrom && (['iadmin', 'ipanel'].indexOf(loadFrom) != -1)) ? loadFrom : 'iadmin',//Define load mode
   validateModeAccess: true,//Define if validate app mode access
@@ -23,38 +24,16 @@ export default {
     'qcrud',
     'quser',
     'qnotification',
-    'qcommerce',
-    'qblog',
     'qform',
-    'qplan',
-    'qad',
-    'qdocument',
     'qassignlp',
-    'qplace',
-    'qcheckin',
-    'qlocations',
-    'qappointment',
-    'qbooking',
     'qgamification',
-    'qevent',
-    'qpage',
-    'qredirect',
-    'qmenu',
     'qmedia',
-    'qslider',
     'qchat',
     'qqreable',
     'qtranslation',
     'qrequestable',
-    'qauction',
-    'qbuilder',
     'qsite',
-    'qcredit',
-    'qoffline',
-    'qwebhook',
-    'qaccounting',
-    'qtask',
-    'qcomment'
+    'qoffline'
   ],
   //Cache
   saveCache: {
