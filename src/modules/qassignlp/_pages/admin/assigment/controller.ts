@@ -164,7 +164,7 @@ export default function controller() {
       return [
         {
           label: i18n.tr('ileads.cms.messages.reassign'),
-          vIf: /*apptDate.isSameOrAfter(tomorrow) &&*/ true,
+          vIf: apptDate.isSameOrAfter(tomorrow),
           props: {
             icon: 'fa-light fa-shuffle',
             label: i18n.tr('ileads.cms.messages.reassign'),
