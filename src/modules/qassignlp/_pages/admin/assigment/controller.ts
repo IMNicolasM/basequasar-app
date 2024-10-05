@@ -229,7 +229,7 @@ export default function controller() {
         state.allLeads = leads
 
         const assigns = assignments.data
-        let allAssigns = leads.filter(l => l.isFollowUp || l.slrId > 0).map(lead => {
+        let allAssigns = leads.filter(l => l.slrId > 0).map(lead => {
           const findAssign = assigns.find(a => a.leadId == lead.id)
           return {...(findAssign || {}), ...lead}
         })
