@@ -8,7 +8,8 @@ let loadFrom = host.split('/')[1];
 
 export default {
   // baseUrl: 'https://localhost:7116',
-  baseUrl: 'https://app-anr-backend-dev-eus.azurewebsites.net',
+  // baseUrl: 'https://app-anr-backend-dev-eus.azurewebsites.net', // Dev
+  // baseUrl: 'https://app-anr-backend-prd-eus.azurewebsites.net', // Prod
   version: pjson.version,//Package version
   mode: (loadFrom && (['iadmin', 'ipanel'].indexOf(loadFrom) != -1)) ? loadFrom : 'iadmin',//Define load mode
   validateModeAccess: true,//Define if validate app mode access
