@@ -14,9 +14,9 @@ import controller from './controller';
 export default defineComponent({
   props: {
     modelValue: {default: false},
-    saveInDb: {default: false},
-    emits: ['update:modelValue', 'runAnr']
+    saveInDb: {default: false}
   },
+  emits: ['update:modelValue', 'runAnr'],
   setup (props, { emit })
   {
     return controller(props, emit);

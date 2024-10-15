@@ -164,7 +164,7 @@ export default function controller() {
       return [
         {
           label: i18n.tr('ileads.cms.messages.reassign'),
-          vIf: apptDate.isSameOrAfter(tomorrow),
+          //vIf: apptDate.isSameOrAfter(tomorrow),
           props: {
             icon: 'fa-light fa-shuffle',
             label: i18n.tr('ileads.cms.messages.reassign'),
@@ -431,44 +431,92 @@ export default function controller() {
 
       state.assignedData = response || {}
     },
-    async reCalc(body) {
+    async reCalc({ body, apptdate, presets }) {
+      console.log("RUN RECALC", {body, apptdate, presets})
+      const configId = body?.configId
+      if(!configId) {
+        alert.error("No configuration has been selected to run the ANR.")
+        return
+      }
+
+      const attributes = {
+        ...body,
+        apptdate
+      }
+
       alert.info('Start the Recalculate of Auto Assigner')
       state.loading = true
 
-      await service.recalculateLeads({attributes: body})
-        .then(async res => {
-          const leadBlocks = state.unMappedAssignedData.filter(l => l.priorityScore == -1)
-          const leads = state.allLeads;
-          const assigns = res.data.map(a => {
-            const lead = leads.find(l => l.id == a.lead_id)
 
-            return {
-              ...lead,
-              distance: a.distance,
-              slrId: a.slr_id
-            }
-          })
-          const followups = leads.filter(l => l.isFollowUp)
+      const presetSelected = presets.find(p => p.id == configId)
+      const { ignoreCredit, rnkId: ignoreRnkId, slot: ignoreSlot, includeDsp, includeSrc, brnId: includeBrnId } = presetSelected.value
+      const filters = presetSelected.value
+      const leads = state.allLeads;
+      const leadsAssigneds = leads.filter(lead => {
+        if(!lead.slrId) return false
+        if (lead.isFollowup) return true
 
-          let allAssign = [...assigns, ...followups, ...leadBlocks]
+        // // Ignore Leads
+        if (methods.matchesBrnIdFilter(includeBrnId, lead.brnId) &&
+          methods.matchesArrayFilter(includeDsp, lead.dspId) //&&
+        //   methods.matchesArrayFilter(includeSrc, lead.srcId) &&
+        //   !methods.matchesArrayFilter(ignoreCredit, lead.crTier) &&
+        //   !methods.matchesArrayFilter(ignoreRnkId, lead.rnkId) &&
+        //   !methods.matchesArrayFilter(ignoreSlot, lead.slot)
+        ) return false;
 
-          const distances = await methods.calcAllDist(allAssign)
-          if(distances?.length) allAssign = distances
+        return true; // Lead passes all filters
+      });
+      console.warn({leads, leadsAssigneds})
 
-          state.unMappedAssignedData = allAssign
+      state.unMappedAssignedData = [...leadsAssigneds]
 
-          const idAssigns = allAssign.map(i => i.id)
-
-          const unAssigns = leads.filter(l => !idAssigns.includes(l.id))
-          state.allUnAssign = unAssigns
-          methods.filterAndMapUnAssign()
-        })
-        .catch(e => {
-          alert.error('Auto Assigner Failed')
-          console.error(e)
-        })
+      // await service.recalculateLeads({attributes})
+      //   .then(async res => {
+      //     const leadBlocks = state.unMappedAssignedData.filter(l => l.priorityScore == -1)
+      //     const leads = state.allLeads;
+      //     const assigns = res.data.map(a => {
+      //       const lead = leads.find(l => l.id == a.lead_id)
+      //
+      //       return {
+      //         ...lead,
+      //         distance: a.distance,
+      //         slrId: a.slr_id
+      //       }
+      //     })
+      //     const followups = leads.filter(l => l.isFollowUp)
+      //
+      //     let allAssign = [...assigns, ...followups, ...leadBlocks]
+      //
+      //     const distances = await methods.calcAllDist(allAssign)
+      //     if(distances?.length) allAssign = distances
+      //
+      //     state.unMappedAssignedData = allAssign
+      //
+      //     const idAssigns = allAssign.map(i => i.id)
+      //
+      //     const unAssigns = leads.filter(l => !idAssigns.includes(l.id))
+      //     state.allUnAssign = unAssigns
+      //     methods.filterAndMapUnAssign()
+      //   })
+      //   .catch(e => {
+      //     alert.error('Auto Assigner Failed')
+      //     console.error(e)
+      //   })
 
       state.loading = false
+    },
+    // Helper function to handle array-based filtering
+    matchesArrayFilter(filterArray, leadField, defaultValue = true) {
+      if (!filterArray.length) return defaultValue;
+      return filterArray.includes(leadField);
+    },
+    // Helper function for handling complex brnId logic
+    matchesBrnIdFilter(brnIdFilters, leadBrnId) {
+      if (brnIdFilters.includes("ALL")) return false;
+      return brnIdFilters.some(brnIdFilter =>
+        brnIdFilter.split(',').some(brn => leadBrnId.includes(brn.trim()))
+      );
     },
     async calcAllDist(leads) {
       let response = []
