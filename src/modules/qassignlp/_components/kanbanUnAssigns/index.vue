@@ -82,10 +82,5 @@ export default defineComponent({
     background-color: transparent !important;
     box-shadow: none !important;
   }
-
-  .q-table th,
-  .q-table td {
-
-  }
 }
 </style>

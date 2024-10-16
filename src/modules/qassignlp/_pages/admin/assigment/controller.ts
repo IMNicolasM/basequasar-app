@@ -62,6 +62,7 @@ export default function controller() {
         field: 'slot1',
         align: 'center',
         borderColor: '#D1FAE5',
+        style: {background: '#F1FEF7'},
         component: simpleCard
       },
       {
@@ -70,7 +71,8 @@ export default function controller() {
         field: 'slot2',
         align: 'center',
         component: simpleCard,
-        borderColor: '#FECACA'
+        borderColor: '#FECACA',
+        style: {background: '#FFF5F5'},
       },
       {
         name: 'slot3',
@@ -78,7 +80,8 @@ export default function controller() {
         field: 'slot3',
         align: 'center',
         component: simpleCard,
-        borderColor: '#DBEAFE'
+        borderColor: '#DBEAFE',
+        style: {background: '#F5F8FF'},
       },
       {
         name: 'slot4',
@@ -86,7 +89,8 @@ export default function controller() {
         field: 'slot4',
         align: 'center',
         component: simpleCard,
-        borderColor: '#EDE9FE'
+        borderColor: '#EDE9FE',
+        style: {background: '#F9F8FD'},
       }
     ],
     columns: [
@@ -568,6 +572,7 @@ export default function controller() {
   onMounted(() => {
     const slotColumns: any = clone(state.columnsSlot).map(s => ({
       ...s,
+      style: {},
       component: {
         template: assign,
         props: { block: true, calcDistance: true },
