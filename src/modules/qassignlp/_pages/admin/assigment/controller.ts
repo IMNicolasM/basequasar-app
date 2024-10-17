@@ -1,4 +1,5 @@
 import { reactive, toRefs, computed, onMounted, watch } from 'vue';
+//@ts-ignore
 import { i18n, moment, alert, helper, clone } from 'src/plugins/utils';
 import service from './services';
 import getName from './getName.vue';
@@ -62,7 +63,7 @@ export default function controller() {
         field: 'slot1',
         align: 'center',
         borderColor: '#D1FAE5',
-        style: {background: '#F1FEF7'},
+        style: { background: '#F1FEF7' },
         component: simpleCard
       },
       {
@@ -72,7 +73,7 @@ export default function controller() {
         align: 'center',
         component: simpleCard,
         borderColor: '#FECACA',
-        style: {background: '#FFF5F5'},
+        style: { background: '#FFF5F5' }
       },
       {
         name: 'slot3',
@@ -81,7 +82,7 @@ export default function controller() {
         align: 'center',
         component: simpleCard,
         borderColor: '#DBEAFE',
-        style: {background: '#F5F8FF'},
+        style: { background: '#F5F8FF' }
       },
       {
         name: 'slot4',
@@ -90,7 +91,7 @@ export default function controller() {
         align: 'center',
         component: simpleCard,
         borderColor: '#EDE9FE',
-        style: {background: '#F9F8FD'},
+        style: { background: '#F9F8FD' }
       }
     ],
     columns: [
@@ -160,6 +161,7 @@ export default function controller() {
       return state.dynamicFilterValues;
     }),
     pageActions: computed(() => {
+      //@ts-ignore
       const date = state.dynamicFilterValues.apptdate;
       const tomorrow = moment().add(1, 'days').startOf('day');
       const apptDate = moment(date);
@@ -279,7 +281,12 @@ export default function controller() {
         });
       });
 
-      let mappedUnAssigns = {};
+      let mappedUnAssigns = {
+        slot1: [],
+        slot2: [],
+        slot3: [],
+        slot4: []
+      };
 
       filteredUnAssign.forEach(u => {
         let nameSlot = `slot${u.slot}`;
@@ -311,16 +318,16 @@ export default function controller() {
     async moveDrag({ evt, row, kanban }) {
       if (!evt) return;
       const { added, removed } = evt;
+      if (!added && !removed) return;
 
-      const element = added?.element;
+      const element = added?.element ?? removed?.element;
       const leadId = element?.id;
       const slot = element?.slot;
-      const index = added?.newIndex;
+      const index = added?.newIndex ?? removed?.oldIndex;
 
       if (kanban == 'unassign') {
-        if (leadId && index >= 0) {
+        if (added && leadId && index >= 0) {
           const newElement = { ...element, priorityScore: 0, distance: null, slrId: null };
-
           const filterUnAssign = state.allUnAssign.filter(l => l.id !== leadId);
           state.allUnAssign = [...filterUnAssign, newElement];
           methods.filterAndMapUnAssign();
@@ -328,52 +335,76 @@ export default function controller() {
           state.unMappedAssignedData = state.unMappedAssignedData.filter(l => l.id !== leadId);
           methods.updateCard({ row: newElement });
         } else if (removed) {
-          const element = removed?.element;
-          const leadId = element?.id;
-          const slot = element?.slot;
-
           state.allUnAssign = state.allUnAssign.filter(l => l.id !== leadId);
           methods.filterAndMapUnAssign();
         }
         return;
-      }
-
-      if (leadId && index >= 0) {
-        const body = {
-          leadId,
-          slrId: row.slrId,
-          slot,
-          rowInfo: row
-        };
-        let saveElement = { ...element, slrId: row.slrId, priorityScore: -1 };
-        await service.calculateAndUpdate({ attributes: body }).then(r => {
-          const dists = r.data;
-          const saveElements = [];
-          const unMapped = clone(state.unMappedAssignedData);
-
-          dists.forEach(d => {
-            if (leadId == d.id) {
-              saveElement.distance = d.distance;
-              saveElements.push(saveElement);
-            } else {
-              const findEl = unMapped.find(l => l.id == d.id);
-
-              if (findEl) {
-                const saveElement = { ...findEl, distance: d.distance };
-
-                saveElements.push(saveElement);
-              } else console.warn('Not found Lead for Distance: ', { d });
-            }
-          });
-
+      } else if (kanban == 'assign') {
+        if (added && leadId && index >= 0) {
+          const body = {
+            leadId,
+            slrId: row.slrId,
+            slot,
+            rowInfo: row
+          };
+          let saveElement = { ...element, slrId: row.slrId, priorityScore: -1 };
           methods.updateCard({ row: saveElement });
-          const onlyIds = saveElements.map(i => i.id);
-          const filterAssignUnMapped = state.unMappedAssignedData.filter(l => !onlyIds.includes(l.id));
-          state.unMappedAssignedData = [...filterAssignUnMapped, ...saveElements];
-        }).catch(e => {
-          console.error(e);
-          alert.error('The distance could not be calculated');
-        });
+          await service.calculateAndUpdate({ attributes: body }).then(r => {
+            const dists = r.data;
+            const saveElements = [];
+            const unMapped = clone(state.unMappedAssignedData);
+
+            dists.forEach(d => {
+              if (leadId == d.id) {
+                saveElement.distance = d.distance;
+                saveElements.push(saveElement);
+              } else {
+                const findEl = unMapped.find(l => l.id == d.id);
+
+                if (findEl) {
+                  const saveElement = { ...findEl, distance: d.distance };
+
+                  saveElements.push(saveElement);
+                } else console.warn('Not found Lead for Distance: ', { d });
+              }
+            });
+            const onlyIds = saveElements.map(i => i.id);
+            const filterAssignUnMapped = state.unMappedAssignedData.filter(l => !onlyIds.includes(l.id));
+            state.unMappedAssignedData = [...filterAssignUnMapped, ...saveElements];
+          }).catch(e => {
+            console.error(e);
+            alert.error('The distance could not be calculated');
+          });
+        } else if (removed) {
+          const nextSlot = slot + 1;
+          const lead = (row[`slot${nextSlot}`]?.data ?? [])[0];
+          const leadId = lead?.id ?? -1;
+
+          if (leadId < 0) return;
+          const body = {
+            leadId,
+            slrId: row.slrId,
+            slot: nextSlot,
+            rowInfo: row
+          };
+
+          await service.calculateAndUpdate({ attributes: body }).then(r => {
+            const dists = r.data;
+            const saveElements = [];
+            dists.forEach(d => {
+              if (leadId == d.id) {
+                lead.distance = d.distance;
+                saveElements.push(lead);
+              }
+            });
+            const onlyIds = saveElements.map(i => i.id);
+            const filterAssignUnMapped = state.unMappedAssignedData.filter(l => !onlyIds.includes(l.id));
+            state.unMappedAssignedData = [...filterAssignUnMapped, ...saveElements];
+          }).catch(e => {
+            console.error(e);
+            alert.error('The distance could not be calculated');
+          });
+        }
       }
     },
     mappedAssigns(assigns = [], otherFilters) {
@@ -455,38 +486,38 @@ export default function controller() {
       alert.info('Start the Recalculate of Auto Assigner');
       state.loading = true;
 
-      await service.recalculateLeads({attributes})
+      await service.recalculateLeads({ attributes })
         .then(async res => {
-          const leadBlocks = state.unMappedAssignedData.filter(l => l.priorityScore == -1)
+          const leadBlocks = state.unMappedAssignedData.filter(l => l.priorityScore == -1);
           const leads = state.allLeads;
-          const leadsAssigneds = methods.getLeadsAssigneds(presetSelected, leads, leadBlocks)
+          const leadsAssigneds = methods.getLeadsAssigneds(presetSelected, leads, leadBlocks);
           const assigns = res.data.map(a => {
-            const lead = leads.find(l => l.id == a.lead_id)
+            const lead = leads.find(l => l.id == a.lead_id);
 
             return {
               ...lead,
               distance: a.distance,
               slrId: a.slr_id
-            }
-          })
+            };
+          });
 
-          let allAssign = [...assigns, ...leadsAssigneds, ...leadBlocks]
+          let allAssign = [...assigns, ...leadsAssigneds, ...leadBlocks];
 
-          const distances = await methods.calcAllDist(allAssign)
-          if(distances?.length) allAssign = distances
+          const distances = await methods.calcAllDist(allAssign);
+          if (distances?.length) allAssign = distances;
 
-          state.unMappedAssignedData = allAssign
+          state.unMappedAssignedData = allAssign;
 
-          const idAssigns = allAssign.map(i => i.id)
+          const idAssigns = allAssign.map(i => i.id);
 
-          const unAssigns = leads.filter(l => !idAssigns.includes(l.id))
-          state.allUnAssign = unAssigns
-          methods.filterAndMapUnAssign()
+          const unAssigns = leads.filter(l => !idAssigns.includes(l.id));
+          state.allUnAssign = unAssigns;
+          methods.filterAndMapUnAssign();
         })
         .catch(e => {
-          alert.error('Auto Assigner Failed')
-          console.error(e)
-        })
+          alert.error('Auto Assigner Failed');
+          console.error(e);
+        });
 
       state.loading = false;
     },
@@ -500,7 +531,7 @@ export default function controller() {
         brnId: includeBrnId
       } = presetSelected.value;
 
-      const leadBlocksId = leadBlocks.map(i => i.id)
+      const leadBlocksId = leadBlocks.map(i => i.id);
 
       return leads.filter(lead => {
         if (!lead.slrId || leadBlocksId.length && leadBlocksId.includes(lead.id)) return false;
@@ -508,9 +539,9 @@ export default function controller() {
 
         let shouldIgnore = (ignoreSlot.length && ignoreSlot.includes(`${lead.slot}`)) ||
           (ignoreRnkId.length && ignoreRnkId.includes(`${lead.rnkId}`)) ||
-          (ignoreCredit.length && ignoreCredit.includes(lead.crTier))
+          (ignoreCredit.length && ignoreCredit.includes(lead.crTier));
 
-        if(!shouldIgnore) {
+        if (!shouldIgnore) {
           shouldIgnore = !(includeDsp.includes(lead.dspId) &&
             includeSrc.includes(lead.srcId) &&
             (includeBrnId.includes('ALL') || includeBrnId.includes(lead.brnId)));

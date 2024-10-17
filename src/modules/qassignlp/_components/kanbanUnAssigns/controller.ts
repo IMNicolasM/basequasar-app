@@ -1,11 +1,7 @@
-import {computed, reactive, ref, onMounted, toRefs, watch, getCurrentInstance, markRaw} from "vue";
-import { i18n, clone } from 'src/plugins/utils'
-import service from "../assigns/services";
+import {computed, reactive, ref, onMounted, toRefs} from "vue";
 
 
 export default function controller(props, emit) {
-  const proxy = getCurrentInstance()!.appContext.config.globalProperties
-
   // Refs
   const refs = { }
 
