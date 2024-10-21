@@ -1,6 +1,6 @@
 import { computed, reactive, nextTick, onMounted, toRefs, watch } from 'vue';
 import services from './services'
-import { clone, i18n } from 'src/plugins/utils';
+import { clone, i18n, cache } from 'src/plugins/utils';
 
 export default function controller(props: any, emit: any) {
   // States
@@ -65,6 +65,9 @@ export default function controller(props: any, emit: any) {
       await methods.getData();
     },
     async getData() {
+      const company_id = await cache.get.item('renuitySelectedCompany');
+      if(company_id < 0) return
+
       const requests = [];
       const results = [];
       const firstResults = []
@@ -72,7 +75,7 @@ export default function controller(props: any, emit: any) {
 
       for (const route of routes) {
         requests.push(
-          services.getData(true, route.params || {}, route.route || '', route.id)
+          services.getData(true, {...(route.params || {}), filter: {...route.params?.filter || {}, company_id: company_id}}, route.route || '', route.id)
         )
         firstResults.push({})
       }
