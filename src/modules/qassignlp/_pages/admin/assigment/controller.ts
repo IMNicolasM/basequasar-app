@@ -152,6 +152,7 @@ export default function controller() {
       }
     },
     openForm: false,
+    chooseCompany: true,
     allBlock: false
   });
 
@@ -170,7 +171,7 @@ export default function controller() {
       return [
         {
           label: i18n.tr('ileads.cms.messages.reassign'),
-          //vIf: apptDate.isSameOrAfter(tomorrow),
+          vIf: apptDate.isSameOrAfter(tomorrow),
           props: {
             icon: 'fa-light fa-shuffle',
             label: i18n.tr('ileads.cms.messages.reassign'),

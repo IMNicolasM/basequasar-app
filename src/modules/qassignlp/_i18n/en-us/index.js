@@ -11,7 +11,9 @@ export default {
       'edit': {
         'config': 'Update Config'
       },
-      'title': {},
+      'title': {
+        'chooseCompany': 'Select Company',
+      },
       'button': {},
       'table': {},
       'label': {
@@ -40,7 +42,8 @@ export default {
         'choosePreset': 'Choose a preset',
         'includeDsp': 'Include Dsp',
         'includeSrc': 'Include Sources',
-        'ignoreCredit': 'Ignore Credits'
+        'ignoreCredit': 'Ignore Credits',
+        'company': 'Company'
       },
       'messages': {
         'reassign': 'Re-calculate Assignments',
