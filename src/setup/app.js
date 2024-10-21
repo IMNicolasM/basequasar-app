@@ -7,7 +7,7 @@ tagsToParceHost.forEach(tagToReplace => host = host.replace(tagToReplace, ''));
 let loadFrom = host.split('/')[1];
 
 export default {
-  // baseUrl: 'https://localhost:7116',
+  baseUrl: 'https://localhost:7116',
   // baseUrl: 'https://app-anr-backend-dev-eus.azurewebsites.net', // Dev
   // baseUrl: 'https://app-anr-backend-prd-eus.azurewebsites.net', // Prod
   version: pjson.version,//Package version
@@ -27,6 +27,7 @@ export default {
     'qnotification',
     'qform',
     'qassignlp',
+    'qsetuprenuity',
     'qgamification',
     'qmedia',
     'qchat',
@@ -39,6 +40,7 @@ export default {
   //Cache
   saveCache: {
     refresh: [
+      'renuitySelectedCompany',
       'sessionData',
       'auth.department.id',
       'auth.role.id',
