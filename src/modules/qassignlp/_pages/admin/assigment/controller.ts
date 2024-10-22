@@ -1,160 +1,18 @@
 import { reactive, toRefs, computed, onMounted, watch } from 'vue';
 //@ts-ignore
-import { i18n, moment, alert, helper, clone } from 'src/plugins/utils';
+import { i18n, moment, alert, helper, clone, cache } from 'src/plugins/utils';
 import service from './services';
-import getName from './getName.vue';
-import simpleCard from '../../../_components/simpleCard/index.vue';
 import assign from '../../../_components/assigns/index.vue';
-
-const dateFormat = 'YYYY/MM/DD';
+import getStateData from './model';
 
 export default function controller() {
 
   // Refs
   const refs = {};
 
+  const getState = getStateData()
   // States
-  const state = reactive({
-    excludeActions: ['search', 'sync', 'export', 'recommendations'],
-    loading: false,
-    dynamicFilterValues: {},
-    dynamicFilterSummary: {},
-    showDynamicFilterModal: false,
-    totalAssigns: 0,
-    totalMiles: 0,
-    filters: {
-      brn_id: {
-        value: 'ALL',
-        type: 'select',
-        quickFilter: true,
-        props: {
-          sortOptions: false,
-          label: i18n.tr('ileads.cms.form.brnId'),
-          options: [
-            { label: 'ALL', value: 'ALL' }
-          ]
-        },
-        loadOptions: {
-          apiRoute: 'apiRoutes.qassignlp.branches',
-          select: { label: 'label', id: 'value' }
-        }
-      },
-      apptdate: {
-        value: moment().format(dateFormat),
-        type: 'date',
-        quickFilter: true,
-        quickNavigation: true,
-        props: {
-          label: i18n.tr('ileads.cms.form.apptdate')
-        }
-      }
-    },
-    filtersUnassign: {},
-    assignedData: {},
-    allLeads: [],
-    employees: [],
-    unMappedAssignedData: [],
-    unAssignedData: {},
-    allUnAssign: [],
-    columnsSlot: [
-      {
-        name: 'slot1',
-        label: i18n.tr('ileads.cms.form.morning'),
-        field: 'slot1',
-        align: 'center',
-        borderColor: '#D1FAE5',
-        style: { background: '#F1FEF7' },
-        component: simpleCard
-      },
-      {
-        name: 'slot2',
-        label: i18n.tr('ileads.cms.form.afternoon'),
-        field: 'slot2',
-        align: 'center',
-        component: simpleCard,
-        borderColor: '#FECACA',
-        style: { background: '#FFF5F5' }
-      },
-      {
-        name: 'slot3',
-        label: i18n.tr('ileads.cms.form.lateAfternoon'),
-        field: 'slot3',
-        align: 'center',
-        component: simpleCard,
-        borderColor: '#DBEAFE',
-        style: { background: '#F5F8FF' }
-      },
-      {
-        name: 'slot4',
-        label: i18n.tr('ileads.cms.form.evening'),
-        field: 'slot4',
-        align: 'center',
-        component: simpleCard,
-        borderColor: '#EDE9FE',
-        style: { background: '#F9F8FD' }
-      }
-    ],
-    columns: [
-      {
-        name: 'brnId',
-        label: i18n.tr('ileads.cms.form.slrName'),
-        field: 'brnId',
-        align: 'rigth',
-        component: getName,
-        class: 'dense-column'
-      }
-    ],
-    fieldsUnAssign: {
-      brnId: {
-        value: 'ALL',
-        type: 'select',
-        props: {
-          sortOptions: false,
-          label: i18n.tr('ileads.cms.form.brnId'),
-          options: [
-            { label: 'ALL', value: 'ALL' }
-          ]
-        },
-        loadOptions: {
-          apiRoute: 'apiRoutes.qassignlp.branches',
-          select: { label: 'label', id: 'value' }
-        }
-      },
-      dspId: {
-        value: 'ALL',
-        type: 'select',
-        props: {
-          label: i18n.tr('ileads.cms.form.dspId'),
-          options: [
-            { label: '-- ALL --', value: 'ALL' }
-          ]
-        },
-        loadOptions: {
-          apiRoute: 'apiRoutes.qassignlp.disposition',
-          select: { label: 'descr', id: 'descr' },
-          requestParams: { filter: { active: 1 } }
-        }
-      },
-      rnkId: {
-        value: 'ALL',
-        type: 'select',
-        props: {
-          label: i18n.tr('ileads.cms.form.rnkId'),
-          options: [
-            { label: '-- ALL --', value: 'ALL' }
-          ]
-        },
-        loadOptions: {
-          apiRoute: 'apiRoutes.qassignlp.rank',
-          select: { label: 'descr', id: 'id' },
-          requestParams: { filter: { active: true } }
-        }
-      }
-    },
-    openForm: false,
-    chooseCompany: true,
-    allBlock: false
-  });
+  const state = reactive(getState);
 
   // Computed
   const computeds = {
@@ -180,7 +38,7 @@ export default function controller() {
             padding: 'xs md',
             color: 'green'
           },
-          action: () => methods.openSetupForm()
+          action: () => state.openForm = true
         },
         {
           label: i18n.tr('isite.cms.label.save'),
@@ -197,6 +55,92 @@ export default function controller() {
           action: () => methods.blockLeads(isBlock)
         }
       ];
+    }),
+    filters: computed(() => {
+      const companyId = state.companyId;
+
+      return {
+        brn_id: {
+          value: 'ALL',
+          type: 'select',
+          quickFilter: true,
+          props: {
+            sortOptions: false,
+            label: i18n.tr('ileads.cms.form.brnId'),
+            options: [
+              { label: 'ALL', value: 'ALL' }
+            ]
+          },
+          loadOptions: {
+            apiRoute: 'apiRoutes.qassignlp.branches',
+            select: { label: 'label', id: 'value' },
+            requestParams: { filter: { company_id: companyId } }
+          }
+        },
+        apptdate: {
+          value: moment().format('YYYY/MM/DD'),
+          type: 'date',
+          quickFilter: true,
+          quickNavigation: true,
+          props: {
+            label: i18n.tr('ileads.cms.form.apptdate')
+          }
+        }
+      }
+
+    }),
+    fieldsUnAssign: computed(() => {
+      const companyId = state.companyId;
+
+      return {
+        brnId: {
+          value: 'ALL',
+          type: 'select',
+          props: {
+            sortOptions: false,
+            label: i18n.tr('ileads.cms.form.brnId'),
+            options: [
+              { label: 'ALL', value: 'ALL' }
+            ]
+          },
+          loadOptions: {
+            apiRoute: 'apiRoutes.qassignlp.branches',
+            select: { label: 'label', id: 'value' },
+            requestParams: { filter: { company_id: companyId } }
+          }
+        },
+        dspId: {
+          value: 'ALL',
+          type: 'select',
+          props: {
+            label: i18n.tr('ileads.cms.form.dspId'),
+            options: [
+              { label: '-- ALL --', value: 'ALL' }
+            ]
+          },
+          loadOptions: {
+            apiRoute: 'apiRoutes.qassignlp.disposition',
+            select: { label: 'descr', id: 'descr' },
+            requestParams: { filter: { active: 1, company_id: companyId } }
+          }
+        },
+        rnkId: {
+          value: 'ALL',
+          type: 'select',
+          props: {
+            label: i18n.tr('ileads.cms.form.rnkId'),
+            options: [
+              { label: '-- ALL --', value: 'ALL' }
+            ]
+          },
+          loadOptions: {
+            apiRoute: 'apiRoutes.qassignlp.rank',
+            select: { label: 'descr', id: 'id' },
+            requestParams: { filter: { active: true, company_id: companyId } }
+          }
+        }
+      }
+
     })
   };
 
@@ -218,8 +162,9 @@ export default function controller() {
     async getData(refresh = false, filter = {}) {
       state.loading = true;
       let otherFilters: any = state.dynamicFilterValues;
+      const companyId = state.companyId;
       const params: any = {
-        filter: { ...(otherFilters || {}), ...(filter || {}), order: { way: 'asc', field: 'brn_id' } },
+        filter: { company_id: companyId, ...(otherFilters || {}), ...(filter || {}), order: { way: 'asc', field: 'brn_id' } },
         take: 1000
       };
 
@@ -231,6 +176,7 @@ export default function controller() {
         service.getData('apiRoutes.qassignlp.leads', refresh, params),
         service.getData('apiRoutes.qassignlp.assignments', refresh, {
           filter: {
+            companyId: companyId,
             apptdate: otherFilters.apptdate,
             priorityScore: '-1'
           }
@@ -312,9 +258,6 @@ export default function controller() {
         slot3: { active: false, data: [] },
         slot4: { active: false, data: [] }
       };
-    },
-    openSetupForm() {
-      state.openForm = true;
     },
     async moveDrag({ evt, row, kanban }) {
       if (!evt) return;
@@ -601,7 +544,20 @@ export default function controller() {
     methods.mappedAssigns(newValue, otherFilters);
   }, { deep: true });
 
-  onMounted(() => {
+  onMounted(async () => {
+    const selectedCompanyId = await cache.get.item('renuitySelectedCompany')
+
+    if(!selectedCompanyId) {
+      alert.warning({
+        mode: 'modal',
+        title: i18n.tr('ileads.cms.title.noCompany'),
+        message: `<div>${i18n.tr('ileads.cms.messages.contactWithAdmin')}</div>`,
+      })
+      return
+    }
+
+    state.companyId = selectedCompanyId;
+    state.companySelected = !!selectedCompanyId
     const slotColumns: any = clone(state.columnsSlot).map(s => ({
       ...s,
       style: {},

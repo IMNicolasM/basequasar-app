@@ -1,7 +1,5 @@
 <template>
-  <div id="assigns">
-    <choose-company v-model="chooseCompany" @selected="(data) => reCalc({...data, apptdate: dynamicFilterValues.apptdate})" />
-
+  <div id="assigns" v-if="companySelected">
     <choose-preset v-model="openForm" @runAnr="(data) => reCalc({...data, apptdate: dynamicFilterValues.apptdate})" />
 
     <page-actions
@@ -90,7 +88,6 @@ import dynamicFilter from 'modules/qsite/_components/master/dynamicFilter';
 import dynamicTableClone from 'modules/qassignlp/_components/dynamicTableClone/index.vue';
 import kanban from 'modules/qassignlp/_components/kanbanUnAssigns/index.vue'
 import choosePreset from 'modules/qassignlp/_components/choosePreset/index.vue'
-import chooseCompany from 'modules/qassignlp/_components/chooseCompany/index.vue'
 
 export default defineComponent({
   props: {},
@@ -98,8 +95,7 @@ export default defineComponent({
     kanban,
     dynamicFilter,
     choosePreset,
-    dynamicTableClone,
-    chooseCompany
+    dynamicTableClone
   },
   setup() {
     return {...controller()};
