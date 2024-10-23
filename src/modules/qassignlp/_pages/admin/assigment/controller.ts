@@ -465,7 +465,7 @@ export default function controller() {
 
           const idAssigns = allAssign.map(i => i.id);
 
-          const unAssigns = leads.filter(l => !idAssigns.includes(l.id));
+          const unAssigns = leads.filter(l => !idAssigns.includes(l.id)).map(l => ({...l, slrId: null, priorityScore: 0}));
           state.allUnAssign = unAssigns;
           methods.filterAndMapUnAssign();
         })
@@ -557,7 +557,7 @@ export default function controller() {
   }, { deep: true });
 
   onMounted(async () => {
-    const selectedCompanyId = await cache.get.item('renuitySelectedCompany');
+    const selectedCompanyId = moduleStore.companySelected
 
     if (!selectedCompanyId) {
       alert.warning({
@@ -568,7 +568,6 @@ export default function controller() {
       return;
     }
 
-    moduleStore.companySelected = selectedCompanyId;
     state.companyId = selectedCompanyId;
     state.companySelected = !!selectedCompanyId;
     const slotColumns: any = clone(state.columnsSlot).map(s => ({

@@ -56,7 +56,7 @@ export default {
         delete: true,
         formLeft: {
           id: { value: '' },
-          companyId: { value: this.companyId },
+          companyId: { value: moduleStore.companySelected },
           active: { value: 1 },
           name: {
             type: 'input',
@@ -102,7 +102,8 @@ export default {
             },
             loadOptions: {
               apiRoute: 'apiRoutes.qassignlp.branches',
-              select: { label: 'label', id: 'value' }
+              select: { label: 'label', id: 'value' },
+              requestParams: { filter: { company_id: moduleStore.companySelected } }
             }
           },
           includeDsp: {
@@ -119,7 +120,7 @@ export default {
             loadOptions: {
               apiRoute: 'apiRoutes.qassignlp.disposition',
               select: { label: 'descr', id: 'descr' },
-              requestParams: { filter: { active: 1 } }
+              requestParams: { filter: { active: 1, company_id: moduleStore.companySelected } }
             }
           },
           includeSrc: {
@@ -136,7 +137,7 @@ export default {
             loadOptions: {
               apiRoute: 'apiRoutes.qassignlp.sources',
               select: { label: 'SourceCode', id: 'SourceCode' },
-              requestParams: { filter: { active: 1 } }
+              requestParams: { filter: { active: 1, company_id: moduleStore.companySelected } }
             }
           },
           slot: {
@@ -171,7 +172,7 @@ export default {
             loadOptions: {
               apiRoute: 'apiRoutes.qassignlp.rank',
               select: { label: 'descr', id: 'id' },
-              requestParams: { filter: { active: true } }
+              requestParams: { filter: { active: true, company_id: moduleStore.companySelected } }
             }
           },
           ignoreCredit: {

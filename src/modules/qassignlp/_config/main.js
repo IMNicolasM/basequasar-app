@@ -1,5 +1,6 @@
 import { cache, store, router } from '../../../plugins/utils';
 import service from '../service'
+import moduleStore from '../store'
 
 export default {
   moduleName: 'ileads',
@@ -24,11 +25,14 @@ export default {
   headerActions: async () => {
     const userData = store.state.quserAuth.userData
     const companies = userData?.options?.companyAssigned || []
-    const selectedCompany = await cache.get.item('renuitySelectedCompany')
+    let selectedCompany = await cache.get.item('renuitySelectedCompany')
     let actionCompany = []
     let label = 'Company'
 
-    if(companies.length && !selectedCompany) await cache.set('renuitySelectedCompany', companies[0])
+    if(companies.length && !selectedCompany) {
+      selectedCompany = companies[0];
+      await cache.set('renuitySelectedCompany', selectedCompany);
+    }
     if(companies.length > 1) {
       await service.getData('apiRoutes.qsetuprenuity.setupCompanies', true, { id: companies })
         .then(res => {
@@ -45,6 +49,7 @@ export default {
         }).catch(e => console.error(e))
     }
 
+    moduleStore.companySelected = selectedCompany
     return [
       {
         id: 'siteActionChooseCompany',
