@@ -2,15 +2,15 @@ import { reactive, toRefs, computed, onMounted, watch } from 'vue';
 //@ts-ignore
 import { i18n, moment, alert, helper, clone, cache } from 'src/plugins/utils';
 import service from './services';
+import moduleStore from '../../../store'
 import assign from '../../../_components/assigns/index.vue';
 import getStateData from './model';
 
 export default function controller() {
-
   // Refs
   const refs = {};
 
-  const getState = getStateData()
+  const getState = getStateData();
   // States
   const state = reactive(getState);
 
@@ -20,7 +20,6 @@ export default function controller() {
       return state.dynamicFilterValues;
     }),
     pageActions: computed(() => {
-      //@ts-ignore
       const date = state.dynamicFilterValues.apptdate;
       const tomorrow = moment().add(1, 'days').startOf('day');
       const apptDate = moment(date);
@@ -29,7 +28,7 @@ export default function controller() {
       return [
         {
           label: i18n.tr('ileads.cms.messages.reassign'),
-          vIf: apptDate.isSameOrAfter(tomorrow),
+          //vIf: apptDate.isSameOrAfter(tomorrow),
           props: {
             icon: 'fa-light fa-shuffle',
             label: i18n.tr('ileads.cms.messages.reassign'),
@@ -86,7 +85,7 @@ export default function controller() {
             label: i18n.tr('ileads.cms.form.apptdate')
           }
         }
-      }
+      };
 
     }),
     fieldsUnAssign: computed(() => {
@@ -139,7 +138,7 @@ export default function controller() {
             requestParams: { filter: { active: true, company_id: companyId } }
           }
         }
-      }
+      };
 
     })
   };
@@ -164,7 +163,10 @@ export default function controller() {
       let otherFilters: any = state.dynamicFilterValues;
       const companyId = state.companyId;
       const params: any = {
-        filter: { company_id: companyId, ...(otherFilters || {}), ...(filter || {}), order: { way: 'asc', field: 'brn_id' } },
+        filter: {
+          company_id: companyId, ...(otherFilters || {}), ...(filter || {}),
+          order: { way: 'asc', field: 'brn_id' }
+        },
         take: 1000
       };
 
@@ -183,7 +185,10 @@ export default function controller() {
         })
       ]).then(async ([employees, leadsResponse, assignments]) => {
         state.employees = employees.data;
-        leads = leadsResponse.data.map(l => helper.snakeToCamelCaseKeys(l));
+        const companyId = state.companyId;
+        leads = leadsResponse.data.map(l => {
+          return { ...helper.snakeToCamelCaseKeys(l), companyId };
+        });
         state.allLeads = leads;
 
         const assigns = assignments.data;
@@ -263,6 +268,7 @@ export default function controller() {
       if (!evt) return;
       const { added, removed } = evt;
       if (!added && !removed) return;
+      const apptdate = state.dynamicFilterValues.apptdate;
 
       const element = added?.element ?? removed?.element;
       const leadId = element?.id;
@@ -289,7 +295,9 @@ export default function controller() {
             leadId,
             slrId: row.slrId,
             slot,
-            rowInfo: row
+            rowInfo: row,
+            companyId: state.companyId,
+            apptdate
           };
           let saveElement = { ...element, slrId: row.slrId, priorityScore: -1 };
           methods.updateCard({ row: saveElement });
@@ -329,7 +337,9 @@ export default function controller() {
             leadId,
             slrId: row.slrId,
             slot: nextSlot,
-            rowInfo: row
+            rowInfo: row,
+            companyId: state.companyId,
+            apptdate,
           };
 
           await service.calculateAndUpdate({ attributes: body }).then(r => {
@@ -424,7 +434,8 @@ export default function controller() {
       }
       const attributes = {
         ...body,
-        apptdate
+        apptdate,
+        companyId: state.companyId
       };
 
       alert.info('Start the Recalculate of Auto Assigner');
@@ -495,10 +506,11 @@ export default function controller() {
       });
     },
     async calcAllDist(leads) {
+      const date = state.dynamicFilterValues.apptdate;
       let response = [];
       if (!leads?.length) return response;
 
-      await service.bulkCalculateDist({ attributes: { leads } })
+      await service.bulkCalculateDist({ attributes: { leads, companyId: state.companyId, apptdate: date } })
         .then((res) => {
           const data = res.data;
 
@@ -527,10 +539,10 @@ export default function controller() {
         priorityScore: row.priorityScore,
         slrId: row.slrId,
         distance: row.distance,
-        apptdate: moment.utc(row.apptdate).startOf('day').toISOString(),
+        apptdate: moment.utc(row.apptdate).startOf('day').format('MM/DD/YYYY HH:mm:ss'),
         leadId: row.id,
         slot: row.slot,
-        company: 'MAD'
+        companyId: row.companyId || state.companyId
       };
 
       service.updateLead(row.id, body).catch(e => alert.error('The lead could not be saved'));
@@ -545,19 +557,20 @@ export default function controller() {
   }, { deep: true });
 
   onMounted(async () => {
-    const selectedCompanyId = await cache.get.item('renuitySelectedCompany')
+    const selectedCompanyId = await cache.get.item('renuitySelectedCompany');
 
-    if(!selectedCompanyId) {
+    if (!selectedCompanyId) {
       alert.warning({
         mode: 'modal',
         title: i18n.tr('ileads.cms.title.noCompany'),
-        message: `<div>${i18n.tr('ileads.cms.messages.contactWithAdmin')}</div>`,
-      })
-      return
+        message: `<div>${i18n.tr('ileads.cms.messages.contactWithAdmin')}</div>`
+      });
+      return;
     }
 
+    moduleStore.companySelected = selectedCompanyId;
     state.companyId = selectedCompanyId;
-    state.companySelected = !!selectedCompanyId
+    state.companySelected = !!selectedCompanyId;
     const slotColumns: any = clone(state.columnsSlot).map(s => ({
       ...s,
       style: {},
