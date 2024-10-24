@@ -29,7 +29,7 @@ export default {
     let actionCompany = []
     let label = 'Company'
 
-    if(companies.length && !selectedCompany || (!companies.includes(selectedCompany))) {
+    if(companies.length && !selectedCompany || !companies.includes(selectedCompany?.toString())) {
       selectedCompany = companies[0];
       await cache.set('renuitySelectedCompany', selectedCompany);
     }

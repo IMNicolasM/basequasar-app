@@ -557,7 +557,7 @@ export default function controller() {
   }, { deep: true });
 
   onMounted(async () => {
-    const selectedCompanyId = moduleStore.companySelected
+    const selectedCompanyId = moduleStore.companySelected || await cache.get.item('renuitySelectedCompany');
 
     if (!selectedCompanyId) {
       alert.warning({
