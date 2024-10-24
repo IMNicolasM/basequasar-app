@@ -450,7 +450,7 @@ export default function controller() {
             const lead = leads.find(l => l.id == a.lead_id);
 
             return {
-              ...lead,
+              ...(lead || helper.snakeToCamelCaseKeys(a)),
               distance: a.distance,
               slrId: a.slr_id
             };
