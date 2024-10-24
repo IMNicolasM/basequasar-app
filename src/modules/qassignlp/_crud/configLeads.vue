@@ -22,6 +22,19 @@ export default {
         entityName: config('main.qassinglp.entityNames.configLeads'),
         apiRoute: 'apiRoutes.qassignlp.config',
         permission: 'ilead.config-leads',
+        modalActions: {
+          save: {
+            props: {
+              color: 'secondary'
+            }
+          },
+          cancel: {
+            props: {
+              outline: true,
+              color: 'secondary'
+            }
+          }
+        },
         create: {
           title: this.$tr('ileads.cms.create.config'),
           requestParams: {

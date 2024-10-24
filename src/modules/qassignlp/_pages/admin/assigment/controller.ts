@@ -145,9 +145,52 @@ export default function controller() {
 
   // Methods
   const methods = {
+    async getActiveSlots(companyId) {
+      try {
+        const res = await service.getData('apiRoutes.qassignlp.slots', true, { filter: { active: 1, company_id: companyId } })
+        const data = res.data
+
+        const allSlot = state.allColumnsSlot;
+        state.numSlots = data.length
+
+        const activeColumns = data.map(d => {
+          const findSlot = allSlot.find(s => s.id === d.id);
+
+          return {
+            ...findSlot,
+            label: d.LongName
+          }
+        })
+
+        state.columnsSlot = activeColumns;
+
+        const slotColumns: any = clone(activeColumns).map(s => ({
+          ...s,
+          style: {},
+          component: {
+            template: assign,
+            props: { block: true, calcDistance: true },
+            events: {
+              change: (e) => methods.moveDrag(e),
+              changeLock: (e) => methods.updateCard(e)
+            }
+          }
+        }));
+
+        state.columns = [
+          ...state.columns,
+          ...slotColumns
+        ];
+      } catch (e) {
+        alert.error('Slots could not be loaded.')
+        console.error(e)
+      }
+
+    },
     blockLeads(lock = false) {
       state.unMappedAssignedData = state.unMappedAssignedData.map(a => ({ ...a, priorityScore: lock ? 0 : -1 }));
       state.allBlock = !lock;
+      state.hasPendingChanges = true;
       const message = !lock ? 'All assigned leads have been blocked.' : 'All assigned leads have been unblocked.';
       alert.info(message);
     },
@@ -168,10 +211,13 @@ export default function controller() {
           order: { way: 'asc', field: 'brn_id' }
         },
         take: 1000
-      };
+      }
 
       let leads = [];
       let idsAssigns = [];
+      let employeesData = [];
+      let allAssigns = [];
+      state.hasPendingChanges = false;
 
       await Promise.all([
         service.getData('apiRoutes.qassignlp.employees', refresh, params),
@@ -184,15 +230,14 @@ export default function controller() {
           }
         })
       ]).then(async ([employees, leadsResponse, assignments]) => {
-        state.employees = employees.data;
+        employeesData = employees.data;
         const companyId = state.companyId;
         leads = leadsResponse.data.map(l => {
           return { ...helper.snakeToCamelCaseKeys(l), companyId };
         });
-        state.allLeads = leads;
 
         const assigns = assignments.data;
-        let allAssigns = leads.filter(l => l.slrId > 0).map(lead => {
+        allAssigns = leads.filter(l => l.slrId > 0).map(lead => {
           const findAssign = assigns.find(a => a.leadId == lead.id);
           return { ...(findAssign || {}), ...lead };
         });
@@ -201,11 +246,14 @@ export default function controller() {
         if (distances?.length) allAssigns = distances;
 
         idsAssigns = allAssigns.map(l => l.id);
-        state.unMappedAssignedData = allAssigns;
       }).catch(e => {
         alert.error(i18n.tr('isite.cms.message.errorRequest'));
         console.error(e);
       });
+      state.employees = employeesData;
+      state.allLeads = leads;
+      state.unMappedAssignedData = allAssigns;
+
       const unAssigns = leads.filter(l => !idsAssigns.includes(l.id));
       state.allUnAssign = unAssigns;
       methods.filterAndMapUnAssign();
@@ -233,12 +281,11 @@ export default function controller() {
         });
       });
 
-      let mappedUnAssigns = {
-        slot1: [],
-        slot2: [],
-        slot3: [],
-        slot4: []
-      };
+      let mappedUnAssigns: any = {};
+
+      for (let i = 1; i <= state.numSlots; i++) {
+        mappedUnAssigns[`slot${i}`] = [];
+      }
 
       filteredUnAssign.forEach(u => {
         let nameSlot = `slot${u.slot}`;
@@ -257,12 +304,13 @@ export default function controller() {
       };
     },
     initializeSlots() {
-      return {
-        slot1: { active: false, data: [] },
-        slot2: { active: false, data: [] },
-        slot3: { active: false, data: [] },
-        slot4: { active: false, data: [] }
-      };
+      let slots: any = {};
+
+      for (let i = 1; i <= state.numSlots; i++) {
+        slots[`slot${i}`] = { active: false, data: [] };
+      }
+
+      return slots
     },
     async moveDrag({ evt, row, kanban }) {
       if (!evt) return;
@@ -528,7 +576,10 @@ export default function controller() {
       const data = [...state.allUnAssign, ...state.unMappedAssignedData];
 
       await service.leadBulkCreateOrUpdate(data)
-        .then(a => alert.info('Leads could be saved'))
+        .then(a => {
+          state.hasPendingChanges = false;
+          alert.info('Leads could be saved');
+        })
         .catch(e => alert.error('The leads could not be saved'));
 
       state.loading = false;
@@ -557,7 +608,7 @@ export default function controller() {
   }, { deep: true });
 
   onMounted(async () => {
-    const selectedCompanyId = moduleStore.companySelected || await cache.get.item('renuitySelectedCompany');
+    const selectedCompanyId = await cache.get.item('renuitySelectedCompany');
 
     if (!selectedCompanyId) {
       alert.warning({
@@ -568,25 +619,9 @@ export default function controller() {
       return;
     }
 
+    await methods.getActiveSlots(selectedCompanyId)
     state.companyId = selectedCompanyId;
     state.companySelected = !!selectedCompanyId;
-    const slotColumns: any = clone(state.columnsSlot).map(s => ({
-      ...s,
-      style: {},
-      component: {
-        template: assign,
-        props: { block: true, calcDistance: true },
-        events: {
-          change: (e) => methods.moveDrag(e),
-          changeLock: (e) => methods.updateCard(e)
-        }
-      }
-    }));
-
-    state.columns = [
-      ...state.columns,
-      ...slotColumns
-    ];
   });
 
   return { ...refs, ...(toRefs(state)), ...computeds, ...methods };

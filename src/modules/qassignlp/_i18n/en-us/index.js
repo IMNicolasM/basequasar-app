@@ -57,7 +57,8 @@ export default {
         'descFutureAppt': 'Represents the importance of considering future appointments when assigning leads. A higher value prioritizes leads that align with the salesperson\'s upcoming schedule and travel routes like locked appointments and Follow-ups.',
         'descDaysSalesman': 'Sets the number of past days considered for evaluating the salesperson\'s performance. Choose between 7, 30, or 60 days to reflect different time frames of sales activity.',
         'descCostPerMile': 'Specifies the cost incurred for each mile traveled. This value is multiplied by the distance to calculate the total trip cost, helping to maximize profit in sales assignments.',
-        'contactWithAdmin': 'To view this page, please contact the administrator. There might be an issue with your permissions or the company data. Once the administrator resolves the issue, you will be able to access the content.'
+        'contactWithAdmin': 'To view this page, please contact the administrator. There might be an issue with your permissions or the company data. Once the administrator resolves the issue, you will be able to access the content.',
+        'beforeRunANR': 'Please save or refresh unsaved changes before running the ANR.'
       },
       'validation': {},
     }

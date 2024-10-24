@@ -1,6 +1,6 @@
 <template>
   <div id="assigns" v-if="companySelected">
-    <choose-preset v-model="openForm" @runAnr="(data) => reCalc({...data, apptdate: dynamicFilterValues.apptdate})" />
+    <choose-preset v-model="openForm" :has-pending-changes="hasPendingChanges" @runAnr="(data) => reCalc({...data, apptdate: dynamicFilterValues.apptdate})" />
 
     <page-actions
       :excludeActions="excludeActions"

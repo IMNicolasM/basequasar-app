@@ -2,7 +2,7 @@ import {computed, reactive, ref, onMounted, toRefs, watch, markRaw, shallowRef, 
 // @ts-ignore
 import dynamicForm from 'src/modules/qsite/_components/master/dynamicForm.vue';
 // @ts-ignore
-import {clone, i18n} from 'src/plugins/utils'
+import {clone, i18n, alert} from 'src/plugins/utils'
 
 
 export default function controller(props, emit) {
@@ -74,8 +74,12 @@ export default function controller(props, emit) {
   // Methods
   const methods = {
     emitData(){
-      emit('runAnr', { body: state.formTemplate, presets: state.presets })
-      state.show = false
+      if(!props.hasPendingChanges) {
+        emit('runAnr', { body: state.formTemplate, presets: state.presets })
+        state.show = false
+      } else {
+        alert.warning(i18n.tr('ileads.cms.messages.beforeRunANR'));
+      }
     }
 
   }
