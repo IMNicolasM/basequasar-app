@@ -1,6 +1,7 @@
 import { computed, reactive, nextTick, onMounted, toRefs, watch } from 'vue';
 import services from './services'
-import { clone, i18n, cache } from 'src/plugins/utils';
+import moduleStore from '../../store'
+import { clone, i18n } from 'src/plugins/utils';
 
 export default function controller(props: any, emit: any) {
   // States
@@ -14,7 +15,8 @@ export default function controller(props: any, emit: any) {
           size: '16px'
         }
       }
-    }
+    },
+    comapnyId: moduleStore.companySelected
     // Key: Default Value
   });
 
@@ -65,8 +67,8 @@ export default function controller(props: any, emit: any) {
       await methods.getData();
     },
     async getData() {
-      const company_id = await cache.get.item('renuitySelectedCompany');
-      if(company_id < 0) return
+      const company_id = state.comapnyId
+      if(!company_id) return
 
       const requests = [];
       const results = [];

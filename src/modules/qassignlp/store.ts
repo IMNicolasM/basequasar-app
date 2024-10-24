@@ -3,7 +3,7 @@ interface StateProps {
   companySelected: number
 }
 const state = reactive<StateProps>({
-  companySelected: -1
+  companySelected: null
 })
 
 export default computed(() => ({

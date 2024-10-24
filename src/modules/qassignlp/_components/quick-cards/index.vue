@@ -1,5 +1,5 @@
 <template>
-  <div id="parent">
+  <div id="parent" v-if="comapnyId">
     <h3 v-if="title" class="tw-text-xl text-primary tw-font-semibold">{{ title }}</h3>
     <br />
     <div class="flex no-wrap tw-gap-4 tw-overflow-x-auto tw-py-3 tw-px-1.5">
