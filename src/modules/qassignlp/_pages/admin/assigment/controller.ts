@@ -1,6 +1,6 @@
 import { reactive, toRefs, computed, onMounted, watch } from 'vue';
 //@ts-ignore
-import { i18n, moment, alert, helper, clone, cache } from 'src/plugins/utils';
+import { i18n, moment, alert, helper, clone, cache, store } from 'src/plugins/utils';
 import service from './services';
 import moduleStore from '../../../store'
 import assign from '../../../_components/assigns/index.vue';
@@ -608,8 +608,7 @@ export default function controller() {
   }, { deep: true });
 
   onMounted(async () => {
-    const selectedCompanyId = await cache.get.item('renuitySelectedCompany');
-
+    let selectedCompanyId = await moduleStore.setCompanySelected()
     if (!selectedCompanyId) {
       alert.warning({
         mode: 'modal',
