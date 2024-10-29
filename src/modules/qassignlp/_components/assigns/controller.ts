@@ -1,5 +1,4 @@
 import {reactive,toRefs} from "vue";
-import service from './services'
 
 export default function controller(props, emit) {
 
@@ -17,7 +16,7 @@ export default function controller(props, emit) {
   // Methods
   const methods = {
     async moveDrag(evt) {
-      emit('change', {evt, row: props.row})
+      emit('change', {evt, row: props.row, kanban: 'assign'})
     },
     changeData(data) {
       emit('changeLock', data)

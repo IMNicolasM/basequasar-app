@@ -1,7 +1,8 @@
 import {computed, reactive, ref, onMounted, toRefs, watch, markRaw, shallowRef, nextTick} from "vue";
 // @ts-ignore
 import dynamicForm from 'src/modules/qsite/_components/master/dynamicForm.vue';
-import {clone, i18n} from 'src/plugins/utils'
+// @ts-ignore
+import {clone, i18n, alert} from 'src/plugins/utils'
 
 
 export default function controller(props, emit) {
@@ -14,6 +15,7 @@ export default function controller(props, emit) {
   // States
   const state = reactive({
     show: false,
+    presets: [],
     formTemplate: {}
   })
 
@@ -58,7 +60,8 @@ export default function controller(props, emit) {
                 },
                 config: {
                   type: 'select',
-                  options: {label: 'name', value: 'id'}
+                  options: {label: 'name', value: 'id'},
+                  loadedOptions: (data: any[]) => state.presets = data
                 },
               },
             },
@@ -71,8 +74,12 @@ export default function controller(props, emit) {
   // Methods
   const methods = {
     emitData(){
-      emit('runAnr', state.formTemplate)
-      state.show = false
+      if(!props.hasPendingChanges) {
+        emit('runAnr', { body: state.formTemplate, presets: state.presets })
+        state.show = false
+      } else {
+        alert.warning(i18n.tr('ileads.cms.messages.beforeRunANR'));
+      }
     }
 
   }

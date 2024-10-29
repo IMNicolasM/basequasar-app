@@ -13,6 +13,8 @@
     </q-card-section>
     <q-card-section class="wrap q-px-sm q-py-none">
       <span v-if="row?.crTier">CR: {{ row.crTier }}</span>
+      <br/>
+      <span v-if="row?.srcId">SRC: {{ row.srcId }}</span>
     </q-card-section>
     <div class="flex q-px-sm items-center">
       <!-- Distancia centrada -->

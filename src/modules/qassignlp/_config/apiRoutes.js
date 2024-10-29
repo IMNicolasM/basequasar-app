@@ -14,6 +14,7 @@ export default {
   rank: `${urlBase}/ranks`,
   config: `${urlBase}/config-leads`,
   calc: `${urlBase}/leads/calc`,
+  slots: `${urlBase}/leads/slots`,
   disposition: `${urlBase}/dispositions`,
   sources: `${urlBase}/sources`,
   progress: `${urlBase}/leads/anr-progress`,

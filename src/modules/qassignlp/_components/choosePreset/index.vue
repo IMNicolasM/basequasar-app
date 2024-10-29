@@ -15,8 +15,9 @@ export default defineComponent({
   props: {
     modelValue: {default: false},
     saveInDb: {default: false},
-    emits: ['update:modelValue', 'runAnr']
+    hasPendingChanges: {default: false}
   },
+  emits: ['update:modelValue', 'runAnr'],
   setup (props, { emit })
   {
     return controller(props, emit);

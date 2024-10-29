@@ -1,6 +1,6 @@
 <template>
-  <div id="assigns">
-    <choose-preset v-model="openForm" @runAnr="(data) => reCalc({...data, apptdate: dynamicFilterValues.apptdate})" />
+  <div id="assigns" v-if="companySelected">
+    <choose-preset v-model="openForm" :has-pending-changes="hasPendingChanges" @runAnr="(data) => reCalc({...data, apptdate: dynamicFilterValues.apptdate})" />
 
     <page-actions
       :excludeActions="excludeActions"
@@ -25,21 +25,24 @@
       @update:summary="summary => dynamicFilterSummary = summary"
     />
 
-    <section class="relative-position tw-w-full tw-flex tw-flex-wrap md:tw-flex-nowrap tw-gutter-sm md:tw-gutter-md tw-gap-4">
+    <section class="header-h-scroll tw-pr-[5px] scroll-y relative-position tw-w-full tw-flex tw-flex-wrap md:tw-flex-nowrap tw-gutter-sm md:tw-gutter-md tw-gap-4">
       <div class="tw-w-full md:tw-w-[60%]">
-        <div class="text-primary text-weight-bold ellipsis title-content items-center tw-text-lg text-center tw-py-2">
-          <label id="titleCrudTable">Sales Rep Availability</label>
-        </div>
-        <div class="tw-sticky top-info tw-flex tw-items-center tw-p-1.5 tw-shadow-xs tw-z-10 tw-mt-3 tw-mb-2 bg-white">
-          <div class="tw-text-sm tw-font-semibold">
-            # of Appointments:
-            <span class="text-primary">{{ totalAssigns }}</span>
+        <div class="custom-sticky">
+          <div class="text-primary text-weight-bold ellipsis title-content items-center tw-text-lg text-center tw-py-2">
+            <label id="titleCrudTable">Sales Rep Availability</label>
           </div>
-          <div class="tw-text-sm tw-ml-8 tw-font-semibold">
-            Miles Driven:
-            <span class="text-primary">{{ this.$trn(totalMiles) }}</span>
+          <div class="tw-sticky top-info tw-flex tw-items-center tw-p-1.5 tw-shadow-xs tw-z-10 tw-mt-3 tw-mb-2 bg-white">
+            <div class="tw-text-sm tw-font-semibold">
+              # of Appointments:
+              <span class="text-primary">{{ totalAssigns }}</span>
+            </div>
+            <div class="tw-text-sm tw-ml-8 tw-font-semibold">
+              Miles Driven:
+              <span class="text-primary">{{ this.$trn(totalMiles) }}</span>
+            </div>
           </div>
         </div>
+
         <div class="scroll-x tw-overflow-x-auto">
           <template v-for="(assigns, key) of assignedData" :key="key">
             <dynamic-table-clone
@@ -52,20 +55,22 @@
           </template>
         </div>
       </div>
-      <div class="tw-w-full md:tw-w-[40%] scroll-x">
-        <div class="text-primary text-weight-bold ellipsis title-content items-center tw-text-lg text-center tw-py-2">
-          <label id="titleCrudTable">Appointments</label>
-        </div>
-        <div class="row q-col-gutter-x-sm tw-px-2" style="display: flex; flex-wrap: wrap;">
-          <template v-for="(field, key) in fieldsUnAssign" :key="key">
-            <div class="col-12 col-md-4">
-              <dynamic-field
-                v-model="filtersUnassign[field.name || key]"
-                :field="field"
-                @update:modelValue="filterAndMapUnAssign"
-              />
-            </div>
-          </template>
+      <div class="custom-scroll tw-w-full md:tw-w-[40%] scroll-x">
+        <div class="custom-sticky">
+          <div class="text-primary text-weight-bold ellipsis title-content items-center tw-text-lg text-center tw-py-2">
+            <label id="titleCrudTable">Appointments</label>
+          </div>
+          <div class="row q-col-gutter-x-sm tw-px-2" style="display: flex; flex-wrap: wrap;">
+            <template v-for="(field, key) in fieldsUnAssign" :key="key">
+              <div class="col-12 col-md-4">
+                <dynamic-field
+                  v-model="filtersUnassign[field.name || key]"
+                  :field="field"
+                  @update:modelValue="filterAndMapUnAssign"
+                />
+              </div>
+            </template>
+          </div>
         </div>
 
         <kanban :kanban-props="{itemKey: 'id', animation: '200'}" :columns="columnsSlot" :rows="unAssignedData" @change="moveDrag" />
@@ -98,15 +103,60 @@ export default defineComponent({
 });
 </script>
 <style lang="scss">
+.layout-padding:has(#assigns) {
+  padding-bottom: 10px;
+  padding-right: 5px;
+}
 #assigns {
-  .top-info {
-    top: 100px;
+  #dynamicFilter {
+    > div:first-child {
+      > div:first-child {
+        display: none;
+      }
+    }
 
-    @media screen and (max-width: $breakpoint-md) {
-      top: 0px;
+    #dynamicFieldComponent {
+      .q-field {
+        padding-bottom: 5px;
+        .q-field__bottom {
+          display: none;
+        }
+      }
     }
   }
 
+  @media (min-width: $breakpoint-md) {
+    #pageActionscomponent {
+      justify-content: end;
+
+      > div:first-child {
+        display: none;
+      }
+
+      > div:nth-child(2) {
+        margin-top: -50px;
+        z-index: 200;
+      }
+    }
+
+    .header-h-scroll {
+      height: calc(100vh - 165px);
+    }
+
+    .custom-sticky {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: white;
+    }
+
+    .custom-scroll {
+      position: sticky;
+      top: 0;
+      height: calc(100vh - 165px);
+      overflow-y: auto;
+    }
+  }
   #dynamic-table {
     .q-table__middle {
       width: 100%;
