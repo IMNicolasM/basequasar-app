@@ -33,7 +33,7 @@ export default function controller(props, emit) {
       const dataToShow =  [
         {title: 'Product', value: row.productId},
         {title: 'Source', value: row.srcId},
-        {title: 'Customer Name', value: `${row.firstName} ${row.lastName}`},
+        {title: 'Customer Name', value: `${row.lastName}, ${row.firstName}`},
         {title: 'Phone Number', value: row.phone},
         {title: 'Prospect Number', value: `<a class="text-primary tw-underline" target="_blank" href="${row.linkProspectNumber}/leaddetail.html?custid=${row.cstId}">${row.cstId}</a>`},
       ]
