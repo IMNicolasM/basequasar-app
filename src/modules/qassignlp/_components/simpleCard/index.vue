@@ -12,7 +12,8 @@
                size="6px" no-caps unelevated class="tw-flex-shrink-0 tw-w-[10px]">
           <q-menu anchor="bottom right" self="top right" :offset="[0, 18]"
             class="tw-rounded-2xl tw-shadow-none tw-top-3 tw-border-2
-            tw-border-gray-100 tw-py-3">
+            tw-border-gray-100 tw-pb-3">
+            <div class="tw-mb-3 q-pa-sm bg-primary text-white">{{ this.$trd(row?.apptdate, {type: 'time'}) }} - {{ row?.brnId }} - {{ row?.city }}, {{ row.state }}</div>
             <div class="q-mx-sm">
             <template v-for="(info, index) of popupInfo" :key="index" >
               <div v-if="info.value" class="tw-flex tw-items-center">
@@ -34,8 +35,6 @@
     </q-card-section>
     <q-card-section class="wrap q-px-sm q-py-none">
       <span v-if="row?.crTier">CR: {{ row.crTier }}</span>
-      <br/>
-      <span v-if="row?.srcId">SRC: {{ row.srcId }}</span>
     </q-card-section>
     <div class="flex q-px-sm items-center">
       <!-- Distancia centrada -->
