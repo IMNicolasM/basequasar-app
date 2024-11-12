@@ -27,6 +27,18 @@ export default function controller(props, emit) {
   const computeds = {
     isBlock: computed(() => {
       return props.row.priorityScore == -1
+    }),
+    popupInfo: computed(() => {
+      const row = props.row;
+      const dataToShow =  [
+        {title: 'Product', value: row.productId},
+        {title: 'Source', value: row.srcId},
+        {title: 'Customer Name', value: `${row.firstName} ${row.lastName}`},
+        {title: 'Phone Number', value: row.phone},
+        {title: 'Prospect Number', value: `<a class="text-primary tw-underline" target="_blank" href="${row.linkProspectNumber}/leaddetail.html?custid=${row.cstId}">${row.cstId}</a>`},
+      ]
+
+      return dataToShow.filter(d => d.value)
     })
   }
 

@@ -1,9 +1,30 @@
 <template>
   <q-card bordered class="tw-text-[9px]" :style="{ backgroundColor: col?.borderColor }">
     <q-card-section class="wrap q-px-sm q-pt-xs q-pb-none">
-      <div class="tw-font-bold tw-text-gray-800" style="white-space: normal; word-wrap: break-word;">
-        {{ row?.brnId }}: {{ row?.city }}, {{ row.state }} - <span
-        :style="{color: COLORS[row?.dspId] || 'black'}">{{ row?.dspId }}</span>
+      <div class="tw-font-bold tw-text-gray-800 tw-flex tw-items-center tw-whitespace-normal tw-break-words">
+        <div class="tw-flex-grow">
+          {{ row?.brnId }}: {{ row?.city }}, {{ row.state }} -
+          <span :style="{ color: COLORS[row?.dspId] || 'black' }">{{ row?.dspId }}</span>
+        </div>
+
+        <!--More Info Button-->
+        <q-btn id="moreData" icon="fa-solid fa-magnifying-glass" rounded dense
+               size="6px" no-caps unelevated class="tw-flex-shrink-0 tw-w-[10px]">
+          <q-menu anchor="bottom right" self="top right" :offset="[0, 18]"
+            class="tw-rounded-2xl tw-shadow-none tw-top-3 tw-border-2
+            tw-border-gray-100 tw-py-3">
+            <div class="q-mx-sm">
+            <template v-for="(info, index) of popupInfo" :key="index" >
+              <div v-if="info.value" class="tw-flex tw-items-center">
+                <span class="tw-font-bold tw-w-[30%]">{{ info.title }}: </span>
+                <span class="q-ml-sm text-blue-grey tw-w-[70%]" v-html="info.value" />
+              </div>
+
+              <q-separator v-if="index < popupInfo.length - 1" class="tw-my-0.5"  />
+            </template>
+            </div>
+          </q-menu>
+        </q-btn>
       </div>
       <div v-if="row?.rnkId > 0">Grade: <span :style="{color: GRADE_COLORS[row?.rnkId] || 'black', fontWeight: 'bold'}">{{
           row?.rnkDesc
