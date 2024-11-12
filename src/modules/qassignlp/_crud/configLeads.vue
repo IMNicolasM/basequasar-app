@@ -154,7 +154,7 @@ export default {
             }
           },
           slot: {
-            value: [3],
+            value: [],
             type: 'select',
             colClass: 'col-12 col-md-6',
             fakeFieldName: 'value',
@@ -163,12 +163,11 @@ export default {
               useInput: true,
               useChips: true,
               multiple: true,
-              options: [
-                { label: 'Slot 1', value: 1 },
-                { label: 'Slot 2', value: 2 },
-                { label: 'Slot 3', value: 3 },
-                { label: 'Slot 4', value: 4 }
-              ]
+            },
+            loadOptions: {
+              apiRoute: 'apiRoutes.qassignlp.slots',
+              select: { label: 'LongName', id: 'id' },
+              requestParams: { filter: { active: 1, company_id: moduleStore.companySelected } }
             }
           },
           rnkId: {
