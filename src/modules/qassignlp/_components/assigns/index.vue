@@ -1,6 +1,11 @@
 <template>
   <!--cell content-->
-  <div :class="`flex tw-min-w-28 tw-m-auto tw-h-full tw-items-center tw-justify-center ${data.active === false ? 'tw-bg-gray-300 tw-rounded-md tw-text-center tw-font-semibold tw-text-gray-800' : ''}`">
+  <div :class="[
+    'flex tw-min-w-28 tw-m-auto tw-h-full tw-items-center tw-justify-center relative',
+    {'tw-bg-gray-300 tw-rounded-md tw-text-center tw-font-semibold tw-text-gray-800': data.active === false}]">
+    <!-- Fondo dinámico -->
+    <div v-if="isDragStart" class="background-overlay" :style="style">
+    </div>
     <div v-if="data.active === false" class="cursor-not-allowed ">
       Not on Schedule
     </div>
@@ -12,6 +17,8 @@
       item-key="id"
       v-bind="$attrs"
       @change="moveDrag"
+      @start="onDragStart"
+      @end="onDragEnd"
     >
       <template #item="{ element }">
         <div class="cursor-pointer q-pb-xs tw-min-w-28 md:tw-w-30 lg:tw-w-40">
@@ -33,9 +40,11 @@ export default defineComponent({
     row: {default: null},
     col: {default: null},
     data: {default: null},
-    block: {default: false}
+    block: {default: false},
+    isDragStart: {default: false},
+    style: {default: null},
   },
-  emits: ['changeLock', 'change'],
+  emits: ['changeLock', 'change', 'onDragStart', 'onDragEnd'],
   setup(props, {emit, attrs}) {
     return { ...controller(props, emit), attrs };
   }

@@ -172,7 +172,9 @@ export default function controller() {
             props: { block: true, calcDistance: true },
             events: {
               change: (e) => methods.moveDrag(e),
-              changeLock: (e) => methods.updateCard(e)
+              changeLock: (e) => methods.updateCard(e),
+              onDragStart: (e) => methods.onDragStart(e),
+              onDragEnd: (e) => methods.onDragEnd(e)
             }
           }
         }));
@@ -597,6 +599,68 @@ export default function controller() {
       };
 
       service.updateLead(row.id, body).catch(e => alert.error('The lead could not be saved'));
+    },
+    onDragStart(event) {
+      const props = event?.props;
+      const index = props?.col?.field || props?.field
+
+      state.columns = state.columns.map(c => {
+        const column = c;
+        if(column?.component) {
+          column.component.props.isDragStart = true
+          if(column.field == index) {
+            column.component.props.style = {
+              backgroundColor: column.borderColor,
+              opacity: '0.4'
+            }
+          } else {
+            column.component.props.style = {
+              backgroundColor: 'black',
+              opacity: '0.6'
+            }
+          }
+        }
+        return column
+      })
+
+      state.columnsSlot = state.columnsSlot.map(c => {
+        const column = c;
+        column.isDragStart = true
+        if(column.field == index) {
+          column.bgStyle = {
+            backgroundColor: column.borderColor,
+            opacity: '0.4'
+          }
+        } else {
+          column.bgStyle = {
+            backgroundColor: 'black',
+              opacity: '0.6'
+          }
+        }
+        return column
+      })
+    },
+    onDragEnd(event) {
+      state.columns = state.columns.map(c => {
+        const column = c;
+        if(column?.component) {
+          column.component.props.isDragStart = false
+        }
+        return column
+      })
+
+      state.columnsSlot = state.columnsSlot.map(c => {
+        const column = c;
+        column.isDragStart = false
+        return column
+      })
+    },
+    getColumnClass(data) {
+      const index = data?.field || 'table';
+      const highlighted = state.dragGroupColumn === index;
+      const diffused = state.dragGroupColumn !== null && state.dragGroupColumn !== index;
+
+      return `${highlighted ? 'highlighted-column' : ''} ${diffused ? 'diffused-column' : ''}`;
     }
   };
   watch(() => state.unMappedAssignedData, (newValue) => {

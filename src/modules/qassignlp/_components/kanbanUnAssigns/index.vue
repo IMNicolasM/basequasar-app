@@ -10,13 +10,18 @@
 
       <!-- Draggable area -->
       <draggable
-        class="tw-min-h-5 drag-h tw-p-2"
+        class="tw-min-h-5 drag-h tw-p-2 relative-position"
         :style="column.style"
         :group="column.field"
         v-bind="kanbanProps"
         :list="rows[column.field]"
         @change="(evt) => $emit('change', {evt, kanban: 'unassign',column, row: rows[column.field]})"
+        @start="(evt) => $emit('onDragStart', {e: evt, props: column})"
+        @end="(evt) => $emit('onDragEnd', {e: evt, props: column})"
         >
+        <template #header>
+          <div v-if="column.isDragStart" class="background-overlay" :style="column.bgStyle" />
+        </template>
         <template #item="{ element }">
           <div>
             <!-- dynamic content -->
@@ -50,7 +55,7 @@ export default defineComponent({
     draggable,
     contentType
   },
-  emits: ['change'],
+  emits: ['change', 'onDragStart', 'onDragEnd'],
   setup(props, {emit}) {
     return controller(props, emit)
   }

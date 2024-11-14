@@ -73,7 +73,9 @@
           </div>
         </div>
 
-        <kanban :kanban-props="{itemKey: 'id', animation: '200'}" :columns="columnsSlot" :rows="unAssignedData" @change="moveDrag" />
+        <kanban :kanban-props="{itemKey: 'id', animation: '200'}"
+                :columns="columnsSlot" :rows="unAssignedData" @change="moveDrag"
+          @onDragEnd="onDragEnd" @onDragStart="onDragStart"/>
       </div>
       <!--Inner loading-->
       <inner-loading :visible="loading"/>
@@ -108,6 +110,19 @@ export default defineComponent({
   padding-right: 5px;
 }
 #assigns {
+  .background-overlay {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    background: black;
+    pointer-events: none; /* Permite interactuar con los elementos en la columna */
+    opacity: 0.8; /* Controla la opacidad del fondo */
+  }
+
   #dynamicFilter {
     > div:first-child {
       > div:first-child {
