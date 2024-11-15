@@ -25,7 +25,8 @@ export default function getStateData() {
     companyId: 0,
     columnsSlot: [],
     numSlots: [],
-    hasPendingChanges: false
+    hasPendingChanges: false,
+    styleSheet: null
   };
 
   res.allColumnsSlot = [

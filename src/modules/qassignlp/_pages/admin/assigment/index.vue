@@ -118,7 +118,6 @@ export default defineComponent({
     right: 0;
     bottom: 0;
     z-index: 1;
-    background: black;
     pointer-events: none; /* Permite interactuar con los elementos en la columna */
     opacity: 0.8; /* Controla la opacidad del fondo */
   }

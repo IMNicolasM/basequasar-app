@@ -4,7 +4,7 @@
     'flex tw-min-w-28 tw-m-auto tw-h-full tw-items-center tw-justify-center relative',
     {'tw-bg-gray-300 tw-rounded-md tw-text-center tw-font-semibold tw-text-gray-800': data.active === false}]">
     <!-- Fondo dinámico -->
-    <div v-if="isDragStart" class="background-overlay" :style="style">
+    <div :class="`background-overlay ${col.field || 'table'}`">
     </div>
     <div v-if="data.active === false" class="cursor-not-allowed ">
       Not on Schedule
@@ -40,9 +40,7 @@ export default defineComponent({
     row: {default: null},
     col: {default: null},
     data: {default: null},
-    block: {default: false},
-    isDragStart: {default: false},
-    style: {default: null},
+    block: {default: false}
   },
   emits: ['changeLock', 'change', 'onDragStart', 'onDragEnd'],
   setup(props, {emit, attrs}) {

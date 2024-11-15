@@ -603,64 +603,27 @@ export default function controller() {
     onDragStart(event) {
       const props = event?.props;
       const index = props?.col?.field || props?.field
+      const borderColor = props?.col?.borderColor || props?.borderColor
 
-      state.columns = state.columns.map(c => {
-        const column = c;
-        if(column?.component) {
-          column.component.props.isDragStart = true
-          if(column.field == index) {
-            column.component.props.style = {
-              backgroundColor: column.borderColor,
-              opacity: '0.4'
-            }
-          } else {
-            column.component.props.style = {
-              backgroundColor: 'black',
-              opacity: '0.6'
-            }
-          }
-        }
-        return column
-      })
+      if(!state.styleSheet) {
+        state.styleSheet = document.createElement('style');
+        document.head.appendChild(state.styleSheet);
+      }
+      state.styleSheet.innerHTML = `.background-overlay
+      {
+       background: black;
+      }
+      .${index || 'table'} {
+        background: ${borderColor || 'black'};
+        opacity: 0.4;
+      }`
 
-      state.columnsSlot = state.columnsSlot.map(c => {
-        const column = c;
-        column.isDragStart = true
-        if(column.field == index) {
-          column.bgStyle = {
-            backgroundColor: column.borderColor,
-            opacity: '0.4'
-          }
-        } else {
-          column.bgStyle = {
-            backgroundColor: 'black',
-              opacity: '0.6'
-          }
-        }
-        return column
-      })
     },
-    onDragEnd(event) {
-      state.columns = state.columns.map(c => {
-        const column = c;
-        if(column?.component) {
-          column.component.props.isDragStart = false
-        }
-        return column
-      })
-
-      state.columnsSlot = state.columnsSlot.map(c => {
-        const column = c;
-        column.isDragStart = false
-        return column
-      })
-    },
-    getColumnClass(data) {
-      const index = data?.field || 'table';
-      const highlighted = state.dragGroupColumn === index;
-      const diffused = state.dragGroupColumn !== null && state.dragGroupColumn !== index;
-
-      return `${highlighted ? 'highlighted-column' : ''} ${diffused ? 'diffused-column' : ''}`;
+    onDragEnd() {
+      if(state.styleSheet) {
+        state.styleSheet.remove();
+        state.styleSheet = null;
+      }
     }
   };
   watch(() => state.unMappedAssignedData, (newValue) => {

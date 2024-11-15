@@ -20,7 +20,7 @@
         @end="(evt) => $emit('onDragEnd', {e: evt, props: column})"
         >
         <template #header>
-          <div v-if="column.isDragStart" class="background-overlay" :style="column.bgStyle" />
+          <div :class="`background-overlay ${column.field || 'table'}`" />
         </template>
         <template #item="{ element }">
           <div>
